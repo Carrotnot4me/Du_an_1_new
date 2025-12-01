@@ -50,27 +50,22 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
 <body style="display:flex; background:#fdf8e7;">
 
     <aside class="sidebar" id="sidebar">
-        <div class="logo p-3 d-flex align-items-center gap-2">
-            <div style="width:44px;height:44px;background:var(--accent);border-radius:8px;
-                display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">
-                AD
-            </div>
-            <div>
-                <div>AdminPanel</div>
-                <small class="text-muted">v1.0</small>
-            </div>
-        </div>
-
-        <nav class="px-3">
-            <a class="nav-item active" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
-            <a class="nav-item" href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
-        </nav>
-
-        <div class="mt-auto p-3 text-muted small">
-            <div>Người dùng: <strong>Admin</strong></div>
-            <div>Email: <small>admin@example.com</small></div>
-        </div>
-    </aside>
+    <div class="logo">
+        <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
+        <div><div>AdminPanel</div><small style="opacity:.8">v1.0</small></div>
+    </div>
+    <nav>
+        <a class="nav-item" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
+        
+        <a class="nav-item active" href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
+        
+        <a class="nav-item" href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
+    </nav>
+    <div style="margin-top:auto;font-size:13px;opacity:.9">
+        <div>Người dùng: <strong>Admin</strong></div>
+        <div style="margin-top:6px">Email: <small>admin@example.com</small></div>
+    </div>
+</aside>
 
     <main class="main flex-grow-1 p-4">
         <h2 class="mb-4 text-dark">Trang quản trị</h2>
