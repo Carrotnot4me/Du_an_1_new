@@ -5,12 +5,18 @@ require_once './commons/function.php';
 require_once './controllers/TourController.php';
 require_once './controllers/DashboardController.php';
 require_once './controllers/RevenueReportController.php';
+require_once './controllers/BookingController.php';
+require_once './controllers/CustomerController.php';
+require_once './controllers/NoteController.php';
 
 $action = $_GET['action'] ?? 'dashboard';
 
 $tourController = new TourController();
 $dashboardController = new DashboardController();
-$revenueReportController = new RevenueReportController(); 
+$revenueReportController = new RevenueReportController();
+$bookingController = new BookingController();
+$customerController = new CustomerController();
+$noteController = new NoteController();
 
 switch ($action) {
     // --- DASHBOARD ACTIONS ---
@@ -34,6 +40,54 @@ switch ($action) {
         break;
     case 'deleteTour':
         $tourController->delete();
+        break;
+
+    // --- BOOKING ACTIONS ---
+    case 'booking-list':
+        $bookingController->list();
+        break;
+    case 'getBookings':
+        $bookingController->getBookings();
+        break;
+    case 'updateBookingStatus':
+        $bookingController->updateStatus();
+        break;
+    case 'getStatuses':
+        $bookingController->getStatuses();
+        break;
+
+    // --- CUSTOMER ACTIONS ---
+    case 'customer-list':
+        $customerController->list();
+        break;
+    case 'getCustomers':
+        $customerController->getCustomers();
+        break;
+    case 'getCustomerDetail':
+        $customerController->getCustomerDetail();
+        break;
+
+    // --- NOTE ACTIONS ---
+    case 'special-notes':
+        $noteController->list();
+        break;
+    case 'getNotes':
+        $noteController->getNotes();
+        break;
+    case 'getNotesByCustomer':
+        $noteController->getNotesByCustomer();
+        break;
+    case 'addNote':
+        $noteController->add();
+        break;
+    case 'updateNote':
+        $noteController->update();
+        break;
+    case 'deleteNote':
+        $noteController->delete();
+        break;
+    case 'getNoteTypes':
+        $noteController->getTypes();
         break;
 
     // --- REVENUE REPORT ACTIONS ---

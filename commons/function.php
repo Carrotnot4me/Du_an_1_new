@@ -1,4 +1,7 @@
 <?php
+if (!defined('DB_HOST')) {
+    require_once __DIR__ . '/env.php';
+}
 
 // Kết nối CSDL qua PDO
 function connectDB() {
