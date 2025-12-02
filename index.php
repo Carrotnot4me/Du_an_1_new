@@ -8,6 +8,7 @@ require_once './controllers/RevenueReportController.php';
 require_once './controllers/BookingController.php';
 require_once './controllers/CustomerController.php';
 require_once './controllers/NoteController.php';
+require_once './controllers/GuideLogController.php';
 
 $action = $_GET['action'] ?? 'dashboard';
 
@@ -17,6 +18,7 @@ $revenueReportController = new RevenueReportController();
 $bookingController = new BookingController();
 $customerController = new CustomerController();
 $noteController = new NoteController();
+$guideLogController = new GuideLogController();
 
 switch ($action) {
     // --- DASHBOARD ACTIONS ---
@@ -93,6 +95,35 @@ switch ($action) {
     // --- REVENUE REPORT ACTIONS ---
     case 'revenue-report':
         $revenueReportController->index();
+        break;
+
+    // --- GUIDE LOG ACTIONS ---
+    case 'guide-logs':
+        $guideLogController->list();
+        break;
+    case 'getGuideLogs':
+        $guideLogController->getAll();
+        break;
+    case 'getGuideLog':
+        $guideLogController->getById();
+        break;
+    case 'getGuideLogsByTour':
+        $guideLogController->getByTour();
+        break;
+    case 'addGuideLog':
+        $guideLogController->add();
+        break;
+    case 'updateGuideLog':
+        $guideLogController->update();
+        break;
+    case 'deleteGuideLog':
+        $guideLogController->delete();
+        break;
+    case 'getGuideLogTours':
+        $guideLogController->getTours();
+        break;
+    case 'getGuideLogGuides':
+        $guideLogController->getGuides();
         break;
 
     // --- DEFAULT ACTION ---
