@@ -9,6 +9,7 @@ require_once './controllers/BookingController.php';
 require_once './controllers/CustomerController.php';
 require_once './controllers/NoteController.php';
 require_once './controllers/GuideLogController.php';
+require_once './controllers/GuideSpecialController.php';
 
 $action = $_GET['action'] ?? 'dashboard';
 
@@ -19,6 +20,7 @@ $bookingController = new BookingController();
 $customerController = new CustomerController();
 $noteController = new NoteController();
 $guideLogController = new GuideLogController();
+$guideSpecialController = new GuideSpecialController();
 
 switch ($action) {
     // --- DASHBOARD ACTIONS ---
@@ -90,6 +92,32 @@ switch ($action) {
         break;
     case 'getNoteTypes':
         $noteController->getTypes();
+        break;
+
+    // --- GUIDE SPECIAL (YÊU CẦU ĐẶC BIỆT CỦA KHÁCH) ---
+    case 'guide-special':
+        $guideSpecialController->list();
+        break;
+    case 'getGuideSpecials':
+        $guideSpecialController->getAll();
+        break;
+    case 'getGuideSpecial':
+        $guideSpecialController->getById();
+        break;
+    case 'addGuideSpecial':
+        $guideSpecialController->add();
+        break;
+    case 'updateGuideSpecial':
+        $guideSpecialController->update();
+        break;
+    case 'deleteGuideSpecial':
+        $guideSpecialController->delete();
+        break;
+    case 'getGuideSpecialTypes':
+        $guideSpecialController->getTypes();
+        break;
+    case 'getGuideSpecialCustomers':
+        $guideSpecialController->getCustomersWithRequests();
         break;
 
     // --- REVENUE REPORT ACTIONS ---
