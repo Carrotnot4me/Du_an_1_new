@@ -27,20 +27,29 @@ class CustomerController {
 
     public function getCustomerDetail() {
         header('Content-Type: application/json');
-        $email = $_GET['email'] ?? null;
-        
-        if ($email) {
-            $customer = $this->customerModel->getByEmail($email);
-            $bookings = $this->customerModel->getBookingsByEmail($email);
-            $notes = $this->noteModel->getByEmail($email);
+        try {
+            $email = $_GET['email'] ?? null;
             
+            if ($email) {
+                $customer = $this->customerModel->getByEmail($email);
+                $bookings = $this->customerModel->getBookingsByEmail($email);
+                $notes = $this->noteModel->getByEmail($email);
+                
+                echo json_encode([
+                    'customer' => $customer ? $customer : null,
+                    'bookings' => $bookings ? $bookings : [],
+                    'notes' => $notes ? $notes : []
+                ]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Missing email parameter']);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
             echo json_encode([
-                'customer' => $customer,
-                'bookings' => $bookings,
-                'notes' => $notes
+                'success' => false, 
+                'message' => 'Server error: ' . $e->getMessage()
             ]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Missing email parameter']);
+            error_log('CustomerController getCustomerDetail Error: ' . $e->getMessage());
         }
         exit;
     }

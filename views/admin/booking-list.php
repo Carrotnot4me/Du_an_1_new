@@ -184,7 +184,7 @@ document.getElementById('updateStatusForm')?.addEventListener('submit', async (e
   }
   
   try {
-    const res = await fetch('api/booking-status.php', {
+    const res = await fetch('index.php?action=updateBookingStatus', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: bookingId, status: status })

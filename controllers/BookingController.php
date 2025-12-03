@@ -16,28 +16,69 @@ class BookingController {
 
     public function getBookings() {
         header('Content-Type: application/json');
-        echo json_encode($this->model->getAll());
+        try {
+            $bookings = $this->model->getAll();
+            echo json_encode($bookings ? $bookings : []);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Server error: ' . $e->getMessage()
+            ]);
+            error_log('BookingController getBookings Error: ' . $e->getMessage());
+        }
         exit;
     }
 
     public function updateStatus() {
         header('Content-Type: application/json');
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = $input['id'] ?? null;
-        $status = $input['status'] ?? null;
-        
-        if ($id && $status) {
+        try {
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                echo json_encode(['success' => false, 'message' => 'Invalid JSON data']);
+                exit;
+            }
+            
+            $id = $input['id'] ?? null;
+            $status = $input['status'] ?? null;
+            
+            if (!$id || !$status) {
+                echo json_encode(['success' => false, 'message' => 'Missing parameters: id and status are required']);
+                exit;
+            }
+            
             $result = $this->model->updateStatus($id, $status);
-            echo json_encode(['success' => $result]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Missing parameters']);
+            
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to update status']);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Server error: ' . $e->getMessage()
+            ]);
+            error_log('BookingController updateStatus Error: ' . $e->getMessage());
         }
         exit;
     }
 
     public function getStatuses() {
         header('Content-Type: application/json');
-        echo json_encode($this->model->getStatuses());
+        try {
+            $statuses = $this->model->getStatuses();
+            echo json_encode($statuses ? $statuses : []);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Server error: ' . $e->getMessage()
+            ]);
+            error_log('BookingController getStatuses Error: ' . $e->getMessage());
+        }
         exit;
     }
 }

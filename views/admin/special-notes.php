@@ -236,12 +236,12 @@ document.getElementById('noteForm')?.addEventListener('submit', async (e) => {
   }
   
   try {
-    const action = noteId ? 'update' : 'add';
+    const action = noteId ? 'updateNote' : 'addNote';
     const requestData = noteId 
-      ? { action: 'update', id: noteId, type: type, content: content }
-      : { action: 'add', email: email, type: type, content: content };
+      ? { id: noteId, type: type, content: content }
+      : { email: email, type: type, content: content };
     
-    const res = await fetch('api/special-notes.php', {
+    const res = await fetch(`index.php?action=${action}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestData)
@@ -273,10 +273,10 @@ async function deleteNote(id) {
   }
   
   try {
-    const res = await fetch('api/special-notes.php', {
+    const res = await fetch('index.php?action=deleteNote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', id: id })
+      body: JSON.stringify({ id: id })
     });
     
     if (!res.ok) {

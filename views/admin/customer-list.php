@@ -147,7 +147,7 @@ async function viewCustomerDetail(email) {
   }
   
   try {
-    const res = await fetch(`api/customer-list.php?action=detail&email=${encodeURIComponent(email)}`);
+    const res = await fetch(`index.php?action=getCustomerDetail&email=${encodeURIComponent(email)}`);
     
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
