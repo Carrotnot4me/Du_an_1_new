@@ -123,10 +123,10 @@
         <mxCell id="wIzVacLbOYvuyxoQshFt-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Báo cáo vận hành" vertex="1">
           <mxGeometry height="60" width="120" x="60" y="870" as="geometry" />
         </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Danh mục&amp;nbsp;" vertex="1">
+        <mxCell id="wIzVacLbOYvuyxoQshFt-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Quản lý danh mục&amp;nbsp;" vertex="1">
           <mxGeometry height="60" width="120" x="240" y="90" as="geometry" />
         </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-15" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Thông tin chi tiết&amp;nbsp;" vertex="1">
+        <mxCell id="wIzVacLbOYvuyxoQshFt-15" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Lập thông tin chi tiết&amp;nbsp;" vertex="1">
           <mxGeometry height="60" width="120" x="260" y="160" as="geometry" />
         </mxCell>
         <mxCell id="wIzVacLbOYvuyxoQshFt-16" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Quản lý phiên bản tour" vertex="1">
