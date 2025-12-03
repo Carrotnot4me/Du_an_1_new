@@ -1,5 +1,5 @@
 <?php
-// SỬA LẠI BASE_URL – XÓA 1 CẤP mvc-oop-basic-duanmau
+
 define('BASE_URL', 'http://mvc-oop-basic-duanmau.test/');
 
 define('DB_HOST', 'localhost');

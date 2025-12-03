@@ -55,16 +55,22 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
         <div><div>AdminPanel</div><small style="opacity:.8">v1.0</small></div>
     </div>
     <nav>
-        <a class="nav-item" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
+        <a class="nav-item active" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
         
-        <a class="nav-item active" href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
+        <a class="nav-item " href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
+
+        <a class="nav-item " href="index.php?action=checkin"><i class="bi bi-calendar-check-fill me-2"></i> Quy trình Check-in</a>
         
-        <a class="nav-item" href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
+        <a class="nav-item " href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
     </nav>
-    <div style="margin-top:auto;font-size:13px;opacity:.9">
-        <div>Người dùng: <strong>Admin</strong></div>
-        <div style="margin-top:6px">Email: <small>admin@example.com</small></div>
-    </div>
+    <?php $user = $_SESSION['user'] ?? null; ?>
+<div style="margin-top:auto;font-size:13px;opacity:.9">
+    <div>Người dùng: <strong><?php echo $user['username'] ?? 'Admin'; ?></strong></div>
+    <div style="margin-top:6px">Email: <small><?php echo $user['email'] ?? 'admin@example.com'; ?></small></div>
+</div>
+    <a href="index.php?action=logout" class="btn btn-danger">
+    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+</a>
 </aside>
 
     <main class="main flex-grow-1 p-4">

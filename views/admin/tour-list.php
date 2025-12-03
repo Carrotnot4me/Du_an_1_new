@@ -21,6 +21,8 @@
         <a class="nav-item" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
         
         <a class="nav-item active" href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
+
+        <a class="nav-item " href="index.php?action=checkin"><i class="bi bi-calendar-check-fill me-2"></i> Quy trình Check-in</a>  
         
         <a class="nav-item" href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
     </nav>
@@ -221,17 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Leaflet + các nút (giữ nguyên 100% code của bạn)
-  // ... (copy nguyên toàn bộ phần Leaflet, thêm ngày, xác nhận bản đồ của bạn vào đây)
-  // Mình đã để lại đầy đủ ở cuối file này
+  
 });
 
-// Load danh sách tour khi vào trang
+
 getTour();
 </script>
 
-<!-- DÁN TOÀN BỘ FORM + MODAL + LEAFLET CODE CỦA BẠN VÀO ĐÂY (đã có sẵn ở cuối file) -->
-<!-- (Bạn không cần làm gì nữa – file này đã hoàn chỉnh 100%) -->
 
 </body>
 </html>
