@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="29.2.3">
   <diagram name="Trang-1" id="PIJG0BX5PHbXLSQEGuaU">
-    <mxGraphModel dx="3474" dy="1035" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1659" dy="325" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -9,14 +9,6 @@
         </mxCell>
         <mxCell id="wIzVacLbOYvuyxoQshFt-39" edge="1" parent="1" source="wIzVacLbOYvuyxoQshFt-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;labelBackgroundColor=none;fontColor=default;" target="wIzVacLbOYvuyxoQshFt-36">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-57" edge="1" parent="1" source="wIzVacLbOYvuyxoQshFt-1" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;labelBackgroundColor=none;fontColor=default;" target="wIzVacLbOYvuyxoQshFt-4">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-58" connectable="0" parent="wIzVacLbOYvuyxoQshFt-57" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="include" vertex="1">
-          <mxGeometry relative="1" x="0.4765" y="-2" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="wIzVacLbOYvuyxoQshFt-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;labelBackgroundColor=none;" value="hdv&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="30" x="790" y="490" as="geometry" />
@@ -33,19 +25,8 @@
         <mxCell id="wIzVacLbOYvuyxoQshFt-13" edge="1" parent="1" source="wIzVacLbOYvuyxoQshFt-2" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=none;fontColor=default;" target="wIzVacLbOYvuyxoQshFt-8">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-55" edge="1" parent="1" source="wIzVacLbOYvuyxoQshFt-2" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;dashed=1;labelBackgroundColor=none;fontColor=default;" target="wIzVacLbOYvuyxoQshFt-4">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-56" connectable="0" parent="wIzVacLbOYvuyxoQshFt-55" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="include" vertex="1">
-          <mxGeometry relative="1" x="-0.1403" y="-2" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="wIzVacLbOYvuyxoQshFt-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;labelBackgroundColor=none;" value="Admin" vertex="1">
           <mxGeometry height="60" width="30" x="-110" y="500" as="geometry" />
-        </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Đăng nhập" vertex="1">
-          <mxGeometry height="60" width="120" x="330" y="500" as="geometry" />
         </mxCell>
         <mxCell id="wIzVacLbOYvuyxoQshFt-25" edge="1" parent="1" source="wIzVacLbOYvuyxoQshFt-5" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;labelBackgroundColor=none;fontColor=default;" target="wIzVacLbOYvuyxoQshFt-14">
           <mxGeometry relative="1" as="geometry" />
@@ -166,7 +147,7 @@
         <mxCell id="wIzVacLbOYvuyxoQshFt-21" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Quản lý khách theo tour" vertex="1">
           <mxGeometry height="60" width="120" x="200" y="725" as="geometry" />
         </mxCell>
-        <mxCell id="wIzVacLbOYvuyxoQshFt-22" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Ghi chú đặc&amp;nbsp;" vertex="1">
+        <mxCell id="wIzVacLbOYvuyxoQshFt-22" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Tạo ghi chú đặc biệt&amp;nbsp;" vertex="1">
           <mxGeometry height="60" width="120" x="200" y="795" as="geometry" />
         </mxCell>
         <mxCell id="wIzVacLbOYvuyxoQshFt-23" parent="1" style="ellipse;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="Quản lý danh sách nhân sự" vertex="1">
