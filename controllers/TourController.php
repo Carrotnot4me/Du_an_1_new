@@ -9,7 +9,7 @@ class TourController {
     }
 
     public function list() {
-        include './views/admin/tour-list.php';
+        include './views/guide/guide_schedule.php';
     }
 
     public function getTours() {
