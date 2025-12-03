@@ -1,38 +1,3 @@
-<?php
-require_once './commons/function.php';
-$conn = connectDB();
-
-// Lấy dữ liệu
-$tours = $conn->query("SELECT * FROM tours")->fetchAll();
-$staffs = $conn->query("SELECT * FROM staffs")->fetchAll();
-$departures = $conn->query("SELECT * FROM departures")->fetchAll();
-
-// Xử lý form POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $depId = $_POST['depId'] ?? null;
-    $tourId = $_POST['tourId'] ?? null;
-    $date = $_POST['date'] ?? null;
-    $guideId = $_POST['guideId'] ?? null;
-    $driverId = $_POST['driver'] ?? null;
-
-    if (isset($_POST['delete']) && $depId) {
-        // Xóa
-        $stmt = $conn->prepare("DELETE FROM departures WHERE id=?");
-        $stmt->execute([$depId]);
-    } elseif ($depId) {
-        // Sửa
-        $stmt = $conn->prepare("UPDATE departures SET tourId=?, date=?, assignedHDV=?, assignedDriver=? WHERE id=?");
-        $stmt->execute([$tourId, $date, $guideId, $driverId, $depId]);
-    } else {
-        // Thêm mới
-        $stmt = $conn->prepare("INSERT INTO departures (tourId, date, assignedHDV, assignedDriver) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$tourId, $date, $guideId, $driverId]);
-    }
-    header("Location: schedule-assign.php");
-    exit;
-}
-?>
-
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -59,10 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <nav>
                 <div class="nav-item"><i class="bi bi-airplane"></i> Quản lý Tour</div>
-                <div class="nav-item active"><i class="bi bi-calendar-check"></i> Đợt khởi hành</div>
+                <div class="nav-item active"><i class="bi bi-calendar-check"></i><a href="index.php?action=schedule-assign">Đợt khởi hành</a></div>
                 <div class="nav-item"><i class="bi bi-bookmark-check"></i> Đặt chỗ</div>
                 <div class="nav-item"><i class="bi bi-people-fill"></i> Khách hàng</div>
-                <div class="nav-item"><i class="bi bi-person-badge"></i><a href="hdv.php?id=1">Hướng dẫn viên</a></div>
+                <div class="nav-item"><i class="bi bi-person-badge"></i><a href="index.php?action=guide">Hướng dẫn viên</a></div>
             </nav>
             <div style="margin-top:auto;font-size:13px;opacity:.9">
                 <div>Người dùng: <strong>Admin</strong></div>
@@ -70,31 +35,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </aside>
 
-        <!-- MAIN -->
+        <!-- MAIN CONTENT -->
         <main class="main">
-            <div class="topbar">
-                <button class="btn btn-sm btn-outline-secondary d-md-none" id="btnToggle"><i
-                        class="bi bi-list"></i></button>
-                <div class="me-2">VI</div>
-                <div class="btn btn-light btn-sm"><i class="bi bi-bell"></i></div>
-                <div class="rounded-circle bg-warning text-dark d-flex align-items:center;justify-content:center"
-                    style="width:50px;height:50px;font-weight:600">A</div>
-            </div>
-
-            <h3 style="margin-bottom:22px;color:#4a3512;">Phân Bổ Lịch Khởi Hành</h3>
+            <h3>Phân Bổ Lịch Khởi Hành</h3>
 
             <div class="grid">
                 <div class="card-panel">
-                    <h2 id="total-departures" style="float:left;">Số lịch hiện có: <?= count($departures) ?></h2>
-                    <button class="btn btn-success" style="float:right;" data-bs-toggle="modal"
-                        data-bs-target="#assignModal">
-                        + Thêm mới
-                    </button>
-                    <div style="clear:both;"></div>
+                    <h2 id="total-departures">Số lịch hiện có: <?= count($departures) ?></h2>
+                    <button class="btn btn-success float-end" data-bs-toggle="modal" data-bs-target="#assignModal">+
+                        Thêm mới</button>
+                    <div class="clearfix"></div>
                 </div>
             </div>
 
-            <div style="margin-top:22px" class="card-panel">
+            <div class="card-panel mt-3">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
@@ -103,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <th>Ngày khởi hành</th>
                             <th>Ngày kết thúc</th>
                             <th>Điểm gặp</th>
-                            <th>Ms-HDV</th>
+                            <th>HDV</th>
                             <th>Tài xế</th>
                             <th>Hành động</th>
                         </tr>
@@ -111,41 +65,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <tbody>
                         <?php foreach ($departures as $i => $d): ?>
                             <tr>
-                                <th scope="row"><?= $i + 1 ?></th>
-
-                                <!-- Tên tour -->
+                                <th><?= $i + 1 ?></th>
                                 <td>
                                     <?php
                                     $idxTour = array_search($d['tourId'], array_column($tours, 'id'));
                                     echo $idxTour !== false ? $tours[$idxTour]['name'] : '--';
                                     ?>
                                 </td>
-
-                                <!-- Ngày khởi hành -->
                                 <td><?= $d['dateStart'] ?? '--' ?></td>
-
-                                <!-- Ngày kết thúc -->
                                 <td><?= $d['dateEnd'] ?? '--' ?></td>
-
-                                <!-- Điểm gặp -->
                                 <td><?= $d['meetingPoint'] ?? '--' ?></td>
-
-                                <!-- Mã HDV -->
                                 <td>
-                                    <?= $d['guideId'] ?? '--' ?>
+                                    <?php
+                                    $idxGuide = array_search($d['guideId'], array_column($guides, 'id'));
+                                    echo $idxGuide !== false ? $guides[$idxGuide]['name'] : '--';
+                                    ?>
                                 </td>
-
-                                <!-- Tài xế -->
-                                <td><?= $d['driver'] ?></td> <!-- hiển thị tên trực tiếp -->
-
-                                <!-- Hành động -->
                                 <td>
-                                    <form method="post" style="display:inline-block">
+                                    <?= $d['driver'] ?? '--' ?>
+                                </td>
+                                <td>
+                                    <form method="post" class="d-inline">
                                         <input type="hidden" name="depId" value="<?= $d['id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-warning">Sửa</button>
                                     </form>
-                                    <form method="post" style="display:inline-block"
-                                        onsubmit="return confirm('Xác nhận xóa?');">
+                                    <form method="post" class="d-inline" onsubmit="return confirm('Xác nhận xóa?');">
                                         <input type="hidden" name="depId" value="<?= $d['id'] ?>">
                                         <input type="hidden" name="delete" value="1">
                                         <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
@@ -153,15 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-
-
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
 
-    <!-- MODAL THÊM / SỬA LỊCH -->
+    <!-- MODAL THÊM / SỬA -->
     <div class="modal fade" id="assignModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -190,27 +132,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="form-label">HDV</label>
                                 <select name="guideId" class="form-select" required>
                                     <option value="">-- Chọn HDV --</option>
-                                    <?php foreach ($staffs as $s):
-                                        if ($s['role'] == 'guide'): ?>
-                                            <option value="<?= $s['id'] ?>"><?= $s['name'] ?></option>
-                                        <?php endif; endforeach; ?>
+                                    <?php foreach ($guides as $s): ?>
+                                        <option value="<?= $s['id'] ?>"><?= $s['name'] ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Tài xế</label>
-                                <select name="driverId" class="form-select" required>
+                                <select name="driver" class="form-select" required>
                                     <option value="">-- Chọn tài xế --</option>
                                     <?php foreach ($staffs as $s):
-                                        if ($s['role'] == 'driver'): ?>
-                                            <option value="<?= $s['id'] ?>"><?= $s['name'] ?></option>
-                                        <?php endif; endforeach; ?>
+                                        $type = strtolower(trim($s['type']));
+                                        if ($type === 'driver'): ?>
+                                            <option value="<?= $s['name'] ?>"><?= $s['name'] ?></option>
+                                        <?php endif;
+                                    endforeach; ?>
                                 </select>
                             </div>
-                        </div>
-                        <div class="mt-3 text-end">
-                            <button type="submit" class="btn btn-success">Lưu</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        </div>
+                            <div class="mt-3 text-end">
+                                <button type="submit" class="btn btn-success">Lưu</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            </div>
                     </form>
                 </div>
             </div>

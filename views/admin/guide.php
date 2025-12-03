@@ -1,22 +1,3 @@
-<?php
-// Kết nối CSDL
-require_once './commons/function.php';
-$conn = connectDB();
-
-// Lấy dữ liệu từ database
-$tours = $conn->query("SELECT * FROM tours")->fetchAll();
-$staffs = $conn->query("SELECT * FROM staffs")->fetchAll();
-$departures = $conn->query("SELECT * FROM departures")->fetchAll();
-
-// Lọc ra hướng dẫn viên, chuẩn hóa chữ hoa/chữ thường và loại bỏ khoảng trắng
-$guides = array_filter($staffs, function($s) {
-    $type = strtolower(trim($s['type'])); // chuẩn hóa
-    return $type === 'guide' || $type === 'quoc_te' || $type === 'noi_dia';
-});
-
-// Reset key mảng 
-$guides = array_values($guides);
-?>
 
 
 
@@ -49,8 +30,8 @@ $guides = array_values($guides);
       </div>
       <nav>
         <div class="nav-item"><i class="bi bi-airplane"></i> Quản lý Tour</div>
-        <div class="nav-item"><i class="bi bi-calendar-check"></i> Đợt khởi hành</div>
-        <div class="nav-item"><i class="bi bi-bookmark-check"></i> Đặt chỗ</div>
+        <div class="nav-item"><i class="bi bi-calendar-check"></i><a href="index.php?action=schedule-assign">Đợt khởi hành</a> </div>
+        <div class="nav-item"><i class="bi bi-bookmark-check"></i><a href="index.php?action=guide-schedule">Đặt chỗ</a> </div>
         <div class="nav-item"><i class="bi bi-people-fill"></i> Khách hàng</div>
         <div class="nav-item active"><i class="bi bi-person-badge"></i> Hướng dẫn viên</div>
       </nav>

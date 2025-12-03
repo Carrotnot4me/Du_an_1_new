@@ -157,7 +157,7 @@ body::before {
 }
 
 .btn-danger {
-  background: linear-gradient(45deg, #e63946, #d97a7a);
+  background: linear-gradient(45deg, #e63946, #f517db);
   color: #fff;
 }
 
