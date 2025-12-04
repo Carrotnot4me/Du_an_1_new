@@ -12,31 +12,82 @@
 <div class="app">
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
-    <div class="logo">
-        <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
-        <div><div>AdminPanel</div><small style="opacity:.8">v1.0</small></div>
-    </div>
-    <nav>
-        <a class="nav-item" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
-        <a class="nav-item" href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
-        <a class="nav-item" href="index.php?action=guide-logs"><i class="bi bi-journal-text me-2"></i> Nhật ký Tour</a>
-        <a class="nav-item" href="index.php?action=booking-list"><i class="bi bi-caendar-clheck me-2"></i> Quản lý Booking</a>
-        <a class="nav-item" href="index.php?action=customer-list"><i class="bi bi-people me-2"></i> Quản lý Khách hàng</a>
-        <a class="nav-item" href="index.php?action=guide-special"><i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt</a>
-        <a class="nav-item active" href="index.php?action=special-notes"><i class="bi bi-sticky me-2"></i> Ghi chú đặc biệt</a>
-        <a class="nav-item" href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
-        
-        <a class="nav-item" href="index.php?action=guides"><i class="bi bi-person-badge-fill me-2"></i> Hướng dẫn viên</a>
+        <div class="logo">
+            <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
+            <div><div>AdminPanel</div><small style="opacity:.8">v1.0</small></div>
+        </div>
 
-        <a class="nav-item" href="index.php?action=schedule-assign"><i class="bi bi-calendar-event-fill me-2"></i> Phân công lịch Tour</a>
+        <nav>
 
-        <a class="nav-item" href="index.php?action=guide-schedule"><i class="bi bi-list-check me-2"></i> Lịch theo Hướng dẫn viên</a>
-    </nav>
-    <div style="margin-top:auto;font-size:13px;opacity:.9">
-        <div>Người dùng: <strong>Admin</strong></div>
-        <div style="margin-top:6px">Email: <small>admin@example.com</small></div>
-    </div>
-</aside>
+            <!-- TRANG CHÍNH -->
+            <a class="nav-item active" href="index.php?action=dashboard">
+                <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
+            </a>
+
+            <!-- QUẢN LÝ TOUR -->
+            <div class="nav-group">QUẢN LÝ TOUR</div>
+
+            <a class="nav-item" href="index.php?action=tour-list">
+                <i class="bi bi-airplane me-2"></i> Danh sách Tour
+            </a>
+
+            <a class="nav-item" href="index.php?action=guide-logs">
+                <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
+            </a>
+
+            <a class="nav-item" href="index.php?action=booking-list">
+                <i class="bi bi-calendar-check me-2"></i> Booking
+            </a>
+
+            <a class="nav-item" href="index.php?action=checkin">
+                <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
+            </a>
+
+            <!-- HƯỚNG DẪN VIÊN -->
+            <div class="nav-group">HƯỚNG DẪN VIÊN</div>
+
+            <a class="nav-item" href="index.php?action=guides">
+                <i class="bi bi-person-badge-fill me-2"></i> Danh sách HDV
+            </a>
+
+            <a class="nav-item" href="index.php?action=schedule-assign">
+                <i class="bi bi-calendar-event me-2"></i> Phân công lịch
+            </a>
+
+            <a class="nav-item" href="index.php?action=guide-schedule">
+                <i class="bi bi-list-check me-2"></i> Lịch HDV
+            </a>
+
+            <!-- BÁO CÁO -->
+            <div class="nav-group">BÁO CÁO</div>
+
+            <a class="nav-item" href="index.php?action=revenue-report">
+                <i class="bi bi-currency-dollar me-2"></i> Doanh thu
+            </a>
+
+            <!-- KHÁC -->
+            <div class="nav-group">KHÁC</div>
+
+            <a class="nav-item" href="index.php?action=guide-special">
+                <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
+            </a>
+
+            <a class="nav-item" href="index.php?action=special-notes">
+                <i class="bi bi-sticky me-2"></i> Ghi chú
+            </a>
+
+        </nav>
+
+        <?php $user = $_SESSION['user'] ?? null; ?>
+        <div style="margin-top:auto;font-size:13px;opacity:.9">
+            <div>Người dùng: <strong><?php echo $user['username'] ?? 'Admin'; ?></strong></div>
+            <div style="margin-top:6px">Email: <small><?php echo $user['email'] ?? 'admin@example.com'; ?></small></div>
+        </div>
+
+        <a href="index.php?action=logout" class="btn btn-danger mt-3">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+        </a>
+    </aside>
 
   <!-- MAIN -->
   <main class="main">
