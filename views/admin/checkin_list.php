@@ -30,6 +30,7 @@
                     Tour</a>
                 
                 <a class="nav-item " href="index.php?action=guide-logs"><i class="bi bi-journal-text me-2"></i> Nhật ký Tour</a>
+                <a class="nav-item" href="index.php?action=booking-list"><i class="bi bi-caendar-clheck me-2"></i> Quản lý Booking</a>
 
                 <a class="nav-item active " href="index.php?action=checkin"><i
                         class="bi bi-calendar-check-fill me-2"></i> Quy trình Check-in</a>

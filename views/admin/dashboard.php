@@ -60,6 +60,7 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
         <a class="nav-item " href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
 
         <a class="nav-item" href="index.php?action=guide-logs"><i class="bi bi-journal-text me-2"></i> Nhật ký Tour</a>
+        <a class="nav-item" href="index.php?action=booking-list"><i class="bi bi-caendar-clheck me-2"></i> Quản lý Booking</a>
 
         <a class="nav-item " href="index.php?action=checkin"><i class="bi bi-calendar-check-fill me-2"></i> Quy trình Check-in</a>
         
@@ -67,9 +68,9 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
         <a class="nav-item" href="index.php?action=guide-special"><i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt</a>
         <a class="nav-item" href="index.php?action=special-notes"><i class="bi bi-sticky me-2"></i> Ghi chú </a>
 
-        <a class="nav-item" href="index.php?action=guides"><i class="bi bi-person-badge-fill me-2"></i> Hướng dẫn viên</a>
+<a class="nav-item" href="index.php?action=guides"><i class="bi bi-person-badge-fill me-2"></i> Hướng dẫn viên</a>
 
-        <a class="nav-item" href="index.php?action=schedule-assign"><i class="bi bi-calendar-event-fill me-2"></i> Phân công lịch Tour</a>
+        <a class="nav-item" href="i        ndex.php?action=schedule-assign"><i class="bi bi-calendar-event-fill me-2"></i> Phân công lịch Tour</a>
 
         <a class="nav-item" href="index.php?action=guide-schedule"><i class="bi bi-list-check me-2"></i> Lịch theo Hướng dẫn viên</a>
     </nav>
