@@ -35,10 +35,23 @@ $sidebarContent = '
         </div>
         
         <nav>
-            <a class="nav-item" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
-            <a class="nav-item" href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
-            <a class="nav-item " href="index.php?action=checkin"><i class="bi bi-calendar-check-fill me-2"></i> Quy trình Check-in</a>  
-            <a class="nav-item active" href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
+            <a class="nav-item " href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
+        
+        <a class="nav-item " href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
+
+        <a class="nav-item" href="index.php?action=guide-logs"><i class="bi bi-journal-text me-2"></i> Nhật ký Tour</a>
+
+        <a class="nav-item " href="index.php?action=checkin"><i class="bi bi-calendar-check-fill me-2"></i> Quy trình Check-in</a>
+        
+        <a class="nav-item active" href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
+        <a class="nav-item" href="index.php?action=guide-special"><i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt</a>
+        <a class="nav-item" href="index.php?action=special-notes"><i class="bi bi-sticky me-2"></i> Ghi chú </a>
+
+        <a class="nav-item" href="index.php?action=guides"><i class="bi bi-person-badge-fill me-2"></i> Hướng dẫn viên</a>
+
+        <a class="nav-item" href="index.php?action=schedule-assign"><i class="bi bi-calendar-event-fill me-2"></i> Phân công lịch Tour</a>
+
+        <a class="nav-item" href="index.php?action=guide-schedule"><i class="bi bi-list-check me-2"></i> Lịch theo Hướng dẫn viên</a>
         </nav>
         
         <div style="margin-top:auto;font-size:13px;opacity:.9">

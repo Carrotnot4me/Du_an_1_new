@@ -1,5 +1,5 @@
 <?php
-// controllers/CheckinController.php
+
 
 require_once 'models/CheckinModel.php';
 
