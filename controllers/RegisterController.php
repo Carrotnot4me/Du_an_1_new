@@ -16,7 +16,7 @@ class RegisterController {
         $success = $_SESSION['register_success'] ?? null;
         unset($_SESSION['register_error'], $_SESSION['register_success']);
         
-        include './views/auth/register.php';
+        include './views/users/register.php';
     }
 
     public function registerAdmin() {
