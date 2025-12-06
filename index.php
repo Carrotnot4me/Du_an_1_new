@@ -4,15 +4,13 @@ session_start();
 require_once './commons/env.php';
 require_once './commons/function.php';
 
-/* -------------------------
-   LOAD CONTROLLERS
----------------------------*/
 require_once './controllers/LoginController.php';
 require_once './controllers/RegisterController.php';
 
 require_once './controllers/DashboardController.php';
 require_once './controllers/TourController.php';
 require_once './controllers/RevenueReportController.php';
+require_once './controllers/PaymentController.php';
 require_once './controllers/CheckinController.php';
 
 require_once './controllers/BookingController.php';
@@ -27,15 +25,13 @@ require_once './controllers/ScheduleController.php';
 require_once './controllers/GuideScheduleController.php';
 
 
-/* -------------------------
-   KHỞI TẠO CONTROLLER
----------------------------*/
 $loginController         = new LoginController();
 $registerController      = new RegisterController();
 
 $dashboardController     = new DashboardController();
 $tourController          = new TourController();
 $revenueReportController = new RevenueReportController();
+$paymentController       = new PaymentController();
 $checkinController       = new CheckinController();
 
 $bookingController       = new BookingController();
@@ -50,9 +46,6 @@ $scheduleController      = new ScheduleController();
 $guideScheduleController = new GuideScheduleController();
 
 
-/* -------------------------
-    HÀM CHECK LOGIN ADMIN
----------------------------*/
 function authGuard()
 {
     if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -62,16 +55,11 @@ function authGuard()
 }
 
 
-// Lấy action (router)
 $action = $_GET['action'] ?? 'dashboard';
 
 
-/* -------------------------
-    ROUTER CHÍNH
----------------------------*/
 switch ($action) {
 
-    /* ===== LOGIN, REGISTER ===== */
     case 'login':
         $loginController->index();
         break;
@@ -93,7 +81,6 @@ switch ($action) {
         break;
 
 
-    /* ===== DASHBOARD ===== */
     case 'dashboard':
     case '':
         authGuard();
@@ -106,7 +93,6 @@ switch ($action) {
         break;
 
 
-    /* ===== TOUR ===== */
     case 'tour-list':
         authGuard();
         $tourController->list();
@@ -128,7 +114,6 @@ switch ($action) {
         break;
 
 
-    /* ===== BOOKING ===== */
     case 'booking-list':
         authGuard();
         $bookingController->list();
@@ -150,7 +135,6 @@ switch ($action) {
         break;
 
 
-    /* ===== CUSTOMER ===== */
     case 'customer-list':
         authGuard();
         $customerController->list();
@@ -167,7 +151,6 @@ switch ($action) {
         break;
 
 
-    /* ===== SPECIAL NOTES ===== */
     case 'special-notes':
         authGuard();
         $noteController->list();
@@ -204,7 +187,6 @@ switch ($action) {
         break;
 
 
-    /* ===== GUIDE SPECIAL REQUEST ===== */
     case 'guide-special':
         authGuard();
         $guideSpecialController->list();
@@ -246,14 +228,17 @@ switch ($action) {
         break;
 
 
-    /* ===== REVENUE REPORT ===== */
     case 'revenue-report':
         authGuard();
         $revenueReportController->index();
         break;
 
+    case 'update-payment-status':
+        authGuard();
+        $revenueReportController->updatePaymentStatus();
+        break;
 
-    /* ===== GUIDE LOGS ===== */
+
     case 'guide-logs':
         authGuard();
         $guideLogController->list();
@@ -300,14 +285,12 @@ switch ($action) {
         break;
 
 
-    /* ===== GUIDE ===== */
     case 'guides':
         authGuard();
         $guideController->index();
         break;
 
 
-    /* ===== LỊCH KHỞI HÀNH ===== */
     case 'schedule-assign':
         authGuard();
         $scheduleController->index();
@@ -319,23 +302,28 @@ switch ($action) {
         break;
 
 
-    /* ===== LỊCH THEO HƯỚNG DẪN VIÊN ===== */
     case 'guide-schedule':
         authGuard();
         $guideScheduleController->index();
         break;
 
 
-    /* ===== CHECKIN ===== */
     case 'checkin':
         authGuard();
         $checkinController->handle();
         break;
 
+    case 'add-payment-form':
+        authGuard();
+        $paymentController->addPaymentForm();
+        break;
 
-    /* ===== DEFAULT ===== */
+    case 'process-payment':
+        authGuard();
+        $paymentController->processPayment();
+        break;
+
     default:
         $dashboardController->index();
         break;
 }
-

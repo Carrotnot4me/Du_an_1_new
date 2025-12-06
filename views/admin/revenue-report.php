@@ -3,7 +3,10 @@ $currentYear = (int)($currentYear ?? date('Y'));
 $currentMonth = (int)($currentMonth ?? 0);
 $details = $report['details'] ?? [];
 $summary = $report['summary'] ?? ['total_revenue' => 0, 'total_expense' => 0, 'total_profit' => 0];
+$paymentHistory = $paymentHistory ?? [];
 
+// Thêm placeholder cho $availableYears để tránh lỗi Undefined variable nếu không được truyền từ Controller
+$availableYears = $availableYears ?? [date('Y'), date('Y') - 1]; 
 
 function formatCurrency($amount) {
     if ($amount === null) return '0đ';
@@ -17,11 +20,9 @@ $months = [
     9 => 'Tháng 9', 10 => 'Tháng 10', 11 => 'Tháng 11', 12 => 'Tháng 12'
 ];
 
-// Lấy giá trị lớn nhất để chuẩn hóa chiều cao cột (dành cho biểu đồ)
 $max_value = max($summary['total_revenue'], $summary['total_expense'], $summary['total_profit']);
-$chart_height = 200; // Chiều cao tối đa của biểu đồ (px)
+$chart_height = 200;
 
-// Hàm tính chiều cao tương đối
 function getChartHeight($value, $max_value, $chart_height) {
     if ($max_value == 0 || $value == 0) return 0;
     return ($value / $max_value) * $chart_height;
@@ -36,12 +37,10 @@ $sidebarContent = '
 
         <nav>
 
-            <!-- TRANG CHÍNH -->
-            <a class="nav-item active" href="index.php?action=dashboard">
+            <a class="nav-item" href="index.php?action=dashboard">
                 <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
             </a>
 
-            <!-- QUẢN LÝ TOUR -->
             <div class="nav-group">QUẢN LÝ TOUR</div>
 
             <a class="nav-item" href="index.php?action=tour-list">
@@ -60,7 +59,6 @@ $sidebarContent = '
                 <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
             </a>
 
-            <!-- HƯỚNG DẪN VIÊN -->
             <div class="nav-group">HƯỚNG DẪN VIÊN</div>
 
             <a class="nav-item" href="index.php?action=guides">
@@ -75,14 +73,12 @@ $sidebarContent = '
                 <i class="bi bi-list-check me-2"></i> Lịch HDV
             </a>
 
-            <!-- BÁO CÁO -->
             <div class="nav-group">BÁO CÁO</div>
 
-            <a class="nav-item" href="index.php?action=revenue-report">
+            <a class="nav-item active" href="index.php?action=revenue-report">
                 <i class="bi bi-currency-dollar me-2"></i> Doanh thu
             </a>
 
-            <!-- KHÁC -->
             <div class="nav-group">KHÁC</div>
 
             <a class="nav-item" href="index.php?action=guide-special">
@@ -95,7 +91,7 @@ $sidebarContent = '
 
         </nav>
 
-       
+        
     </aside>
 ';
 ?>
@@ -124,12 +120,11 @@ $sidebarContent = '
             padding: 2rem;
             background-color: #fdf8e7;
         }
-        /* Style cho biểu đồ cột */
         .bar-chart-container {
             display: flex;
             align-items: flex-end;
             justify-content: space-around;
-            height: 250px; /* Chiều cao tổng cộng bao gồm cả label */
+            height: 250px;
             padding-top: 50px;
             border-bottom: 1px solid #ccc;
         }
@@ -144,13 +139,25 @@ $sidebarContent = '
             width: 100%;
             border-radius: 4px 4px 0 0;
             transition: height 0.5s ease-in-out;
-            min-height: 1px; /* Đảm bảo cột hiển thị nếu giá trị khác 0 */
+            min-height: 1px;
         }
         .bar-label {
             margin-top: 5px;
             font-size: 14px;
             font-weight: 500;
         }
+        .status-icon {
+            cursor: pointer;
+        }
+        .status-text {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        .table-responsive {
+        overflow: visible !important;
+    }
     </style>
 </head>
 
@@ -167,8 +174,23 @@ $sidebarContent = '
             <div class="rounded-circle bg-warning text-dark d-flex align-items:center;justify-content:center" style="width:50px;height:50px;font-weight:600">A</div>
         </div>
         
-        <h2 class="mb-4 text-dark"><i class="bi bi-file-earmark-bar-graph me-2"></i> Báo cáo Doanh thu</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-dark"><i class="bi bi-file-earmark-bar-graph me-2"></i> Báo cáo Doanh thu</h2>
+            <a href="index.php?action=add-payment-form" class="btn btn-warning">
+                <i class="bi bi-cash-coin me-2"></i> Ghi nhận Thanh toán
+            </a>
+        </div>
 
+        <?php 
+            $message = $_GET['message'] ?? null;
+            $status = $_GET['status'] ?? null;
+            if ($message): 
+        ?>
+            <div class="alert alert-<?php echo $status === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+                <?php echo htmlspecialchars($message); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
         <div class="card-panel bg-white rounded shadow-sm p-4 mb-4">
             <form method="GET" action="index.php" class="row g-3 align-items-end">
                 <input type="hidden" name="action" value="revenue-report">
@@ -238,6 +260,82 @@ $sidebarContent = '
                     <div class="bar-label text-success">Lợi nhuận</div>
                 </div>
             </div>
+        </div>
+        
+        <h4 class="mt-5 mb-3 text-dark"><i class="bi bi-wallet-fill me-2"></i> Lịch sử Thanh toán</h4>
+        <div class="card-panel bg-white rounded shadow-sm p-4 mb-4">
+            <?php if (empty($paymentHistory)): ?>
+                <div class="alert alert-warning" role="alert">
+                    Không có giao dịch thanh toán nào được ghi nhận cho kỳ này.
+                </div>
+            <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Mã TT</th> <th>Mã Booking</th>
+                            <th>Tour</th>
+                            <th>Ngày Thanh toán</th>
+                            <th class="text-end">Số tiền (VNĐ)</th>
+                            <th>Phương thức</th>
+                            <th class="text-center">Trạng thái</th> </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($paymentHistory as $payment): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($payment['id'] ?? 'N/A'); ?></td>
+                            <td>#<?php echo htmlspecialchars($payment['bookingId']); ?></td>
+                            <td><?php echo htmlspecialchars($payment['tour_name']); ?></td>
+                            <td><?php echo date('d/m/Y H:i', strtotime($payment['payment_date'])); ?></td>
+                            <td class="text-end">
+                                <strong><?php echo formatCurrency($payment['amount']); ?></strong>
+                                <?php if (isset($payment['total_booking_amount']) && $payment['amount'] < $payment['total_booking_amount']): ?>
+                                    <small class="text-danger"></small>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo htmlspecialchars($payment['method']); ?></td>
+                            
+                            <td class="text-center text-nowrap">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light dropdown-toggle status-icon" 
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Cập nhật trạng thái">
+                                        <?php 
+                                            $status = htmlspecialchars($payment['status']);
+                                            $icon = 'bi-question-circle-fill text-secondary';
+                                            $colorClass = 'text-secondary';
+
+                                            if ($status == 'Hoàn thành') {
+                                                $icon = 'bi-check-circle-fill text-success';
+                                                $colorClass = 'text-success';
+                                            } else if ($status == 'Đã cọc') { // Trạng thái mới
+                                                $icon = 'bi-piggy-bank-fill text-info';
+                                                $colorClass = 'text-info';
+                                            } else if ($status == 'Chờ xử lý') {
+                                                $icon = 'bi-clock-fill text-warning';
+                                                $colorClass = 'text-warning';
+                                            } else if ($status == 'Đã hủy') {
+                                                $icon = 'bi-x-octagon-fill text-danger';
+                                                $colorClass = 'text-danger';
+                                            }
+                                        ?>
+                                        <i class="bi <?php echo $icon; ?> fs-5"></i>
+                                        <span class="status-text <?php echo $colorClass; ?>"><?php echo $status; ?></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><h6 class="dropdown-header">Cập nhật Trạng thái</h6></li>
+                                        <li><a class="dropdown-item" href="index.php?action=update-payment-status&id=<?php echo htmlspecialchars($payment['id']); ?>&status=Hoàn thành">Hoàn thành <i class="bi bi-check-circle-fill text-success float-end"></i></a></li>
+                                        <li><a class="dropdown-item" href="index.php?action=update-payment-status&id=<?php echo htmlspecialchars($payment['id']); ?>&status=Đã cọc">Đã cọc <i class="bi bi-piggy-bank-fill text-info float-end"></i></a></li>
+                                        <li><a class="dropdown-item" href="index.php?action=update-payment-status&id=<?php echo htmlspecialchars($payment['id']); ?>&status=Chờ xử lý">Chờ xử lý <i class="bi bi-clock-fill text-warning float-end"></i></a></li>
+                                        <li><a class="dropdown-item" href="index.php?action=update-payment-status&id=<?php echo htmlspecialchars($payment['id']); ?>&status=Đã hủy">Đã hủy <i class="bi bi-x-octagon-fill text-danger float-end"></i></a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php endif; ?>
         </div>
         
     </main>

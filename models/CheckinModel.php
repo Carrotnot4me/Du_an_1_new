@@ -26,7 +26,7 @@ function getBookingListForCheckin($keyword = '') {
     if (!empty($keyword)) {
         $sql .= " AND (t.name LIKE :keyword_name OR t.tour_code LIKE :keyword_code OR b.id = :keyword_id)";
         $params[':keyword_name'] = '%' . $keyword . '%';
-        $params[':keyword_code'] = '%' . $keyword . '%'; // Sử dụng LIKE cho tour_code nếu muốn tìm kiếm linh hoạt
+        $params[':keyword_code'] = '%' . $keyword . '%';
         $params[':keyword_id'] = $keyword;
     }
 
@@ -71,4 +71,18 @@ function performCheckin($bookingId) {
         ':booking_id' => $bookingId,
         ':departure_id' => $departureId
     ]);
+}
+
+function undoCheckin($bookingId) {
+    $conn = connectDB();
+    
+    $stmtCheck = $conn->prepare("SELECT id FROM checkins WHERE bookingId = :booking_id");
+    $stmtCheck->execute([':booking_id' => $bookingId]);
+    if (!$stmtCheck->fetch()) {
+        return false;
+    }
+    
+    $sql = "DELETE FROM checkins WHERE bookingId = :booking_id";
+    $stmt = $conn->prepare($sql);
+    return $stmt->execute([':booking_id' => $bookingId]);
 }

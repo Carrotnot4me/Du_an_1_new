@@ -21,12 +21,10 @@
 
         <nav>
 
-            <!-- TRANG CHÍNH -->
             <a class="nav-item active" href="index.php?action=dashboard">
                 <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
             </a>
 
-            <!-- QUẢN LÝ TOUR -->
             <div class="nav-group">QUẢN LÝ TOUR</div>
 
             <a class="nav-item" href="index.php?action=tour-list">
@@ -45,7 +43,6 @@
                 <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
             </a>
 
-            <!-- HƯỚNG DẪN VIÊN -->
             <div class="nav-group">HƯỚNG DẪN VIÊN</div>
 
             <a class="nav-item" href="index.php?action=guides">
@@ -60,14 +57,12 @@
                 <i class="bi bi-list-check me-2"></i> Lịch HDV
             </a>
 
-            <!-- BÁO CÁO -->
             <div class="nav-group">BÁO CÁO</div>
 
             <a class="nav-item" href="index.php?action=revenue-report">
                 <i class="bi bi-currency-dollar me-2"></i> Doanh thu
             </a>
 
-            <!-- KHÁC -->
             <div class="nav-group">KHÁC</div>
 
             <a class="nav-item" href="index.php?action=guide-special">
@@ -160,7 +155,9 @@
                                                     onclick="return confirm('Xác nhận Check-in cho Booking ID <?php echo $booking_id; ?>?');"
                                                     class="btn btn-sm btn-primary text-nowrap">Check-in Ngay</a>
                                             <?php else: ?>
-                                                <button class="btn btn-sm btn-secondary" disabled>Hoàn tất</button>
+                                                <a href="index.php?action=checkin&sub_action=undo_checkin&booking_id=<?php echo $booking_id; ?>"
+                                                    onclick="return confirm('Xác nhận HOÀN TÁC Check-in cho Booking ID <?php echo $booking_id; ?>?');"
+                                                    class="btn btn-sm btn-danger text-nowrap">Hoàn tác</a>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

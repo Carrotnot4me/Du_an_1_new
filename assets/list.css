@@ -228,6 +228,9 @@ body::before {
     color: #fff;
     font-weight: 600;
 }
+.table-responsive {
+    overflow: visible !important;
+}
 
 @media(max-width: 900px) {
     .sidebar { position: fixed; left: -250px; transition: left 0.3s; z-index: 50; }
