@@ -45,6 +45,15 @@ switch ($action) {
     case 'deleteTour':
         $tourController->delete();
         break;
+    case 'tourDetail':
+        $tourController->detail();
+        break;
+    case 'editTour':
+        $tourController->edit();
+        break;
+    case 'updateTour':
+        $tourController->update();
+        break;
 
     // --- BOOKING ACTIONS ---
     case 'booking-list':
