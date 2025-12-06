@@ -22,7 +22,7 @@
         <nav>
 
             <!-- TRANG CHÍNH -->
-            <a class="nav-item active" href="index.php?action=dashboard">
+            <a class="nav-item " href="index.php?action=dashboard">
                 <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
             </a>
 
@@ -52,7 +52,7 @@
                 <i class="bi bi-person-badge-fill me-2"></i> Danh sách HDV
             </a>
 
-            <a class="nav-item" href="index.php?action=schedule-assign">
+            <a class="nav-item active" href="index.php?action=schedule-assign">
                 <i class="bi bi-calendar-event me-2"></i> Phân công lịch
             </a>
 

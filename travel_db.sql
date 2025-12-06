@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 03, 2025 at 01:17 PM
+-- Generation Time: Dec 06, 2025 at 05:23 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -67,7 +67,7 @@ CREATE TABLE `checkins` (
 --
 
 INSERT INTO `checkins` (`id`, `bookingId`, `departureId`, `checkin_time`, `is_checked_in`) VALUES
-(1, '2', NULL, '2025-12-03 19:39:13', 1);
+(3, '2', NULL, '2025-12-06 12:09:42', 1);
 
 -- --------------------------------------------------------
 
@@ -104,7 +104,9 @@ CREATE TABLE `departures` (
 --
 
 INSERT INTO `departures` (`id`, `tourId`, `dateStart`, `dateEnd`, `meetingPoint`, `guideId`, `driver`) VALUES
-('1', '1', '2025-12-01', '2025-11-06', 'Sân bay Tân Sơn Nhất', 'WBeUkHX', 'Lê Văn Lộc');
+('1', '1', '2025-12-01', '2025-11-06', 'Sân bay Tân Sơn Nhất', 'WBeUkHX', 'Lê Văn Lộc'),
+('2', '2', '2025-12-01', '2025-12-06', 'Bến xe Nước Ngầm', '2', 'Đinh Đức Anh'),
+('5', '6', '2025-09-05', '2025-09-08', 'Sân bay Tân Sơn Nhất (SGN)', '1', 'Lê Văn Tám');
 
 -- --------------------------------------------------------
 
@@ -208,6 +210,31 @@ INSERT INTO `notes` (`id`, `customerId`, `type`, `content`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` int NOT NULL,
+  `bookingId` varchar(10) NOT NULL,
+  `payment_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `amount` int NOT NULL,
+  `method` varchar(50) DEFAULT NULL,
+  `status` varchar(50) DEFAULT 'Chờ xử lý',
+  `transaction_code` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `bookingId`, `payment_date`, `amount`, `method`, `status`, `transaction_code`) VALUES
+(1, '2', '2025-11-18 10:30:00', 5000000, 'Chuyển khoản', 'Đã cọc', 'TXN123456'),
+(2, '1', '2025-12-05 20:32:25', 2000000, 'Chuyển khoản', 'Đã hủy', NULL),
+(3, '1', '2025-12-05 21:24:15', 10000000, 'Chuyển khoản', 'Hoàn thành', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `revenues`
 --
 
@@ -256,6 +283,7 @@ CREATE TABLE `staffs` (
 INSERT INTO `staffs` (`id`, `name`, `sex`, `email`, `phone`, `avatar`, `type`, `certificate`, `experience`, `health`, `toursLed`, `rating`) VALUES
 ('1', 'Trần Minh Hùng', 'Nam', 'tranminh354@gmail.com', '0901234567', 'https://i.pinimg.com/736x/14/23/86/1423864abc57f67290992f6c0d69c416.jpg', 'quoc_te', NULL, NULL, NULL, NULL, NULL),
 ('2', 'Nguyễn Thị Lan', 'Nữ', 'thilan344@gmail.com', '0902345678', 'https://i.pinimg.com/1200x/d6/86/13/d68613bbfa13dc302727bb7403325f78.jpg', 'noi_dia', 'HDV Nội địa', '5 năm', 'Tốt', 50, '4.6'),
+('5', 'Đào Đức Anh', 'Nữ', 'ddao51531@gmail.com', '0969778516', 'https://i.pinimg.com/1200x/e8/cc/20/e8cc20aff2a0e0fe6883695f2874b778.jpg', 'noi_dia', 'không có', '20 ', 'tốt', 100, '5.0'),
 ('7c9wlnl', 'Trần Tuấn A', 'Nữ', 'admin@gmail.com', '0901234567', 'https://jbagy.me/wp-content/uploads/2025/03/Hinh-anh-avatar-nam-cute-2.jpg', 'noi_dia', NULL, NULL, NULL, NULL, NULL),
 ('WBeUkHX', 'Nguyễn Văn Đức Anh', 'Nam', 'nvducanh@gmail.com', '0987654321', 'https://jbagy.me/wp-content/uploads/2025/03/Hinh-anh-avatar-nam-cute-2.jpg', 'quoc_te', NULL, NULL, NULL, NULL, NULL);
 
@@ -307,7 +335,8 @@ CREATE TABLE `tours` (
 INSERT INTO `tours` (`id`, `type`, `name`, `tour_code`, `main_destination`, `short_description`, `max_people`) VALUES
 ('1', 'Nội địa', 'Tour Miền Trung', 'ZK9T4MJD', 'Hồ Chí Minh', 'Hành trình 5 ngày khám phá trọn vẹn di sản miền Trung từ Đà Nẵng, Hội An, Huế đến Quảng Bình.', 30),
 ('2', 'Nội địa', 'Du lịch Nhật Bản', 'Q8R2LSXA', 'Osaka', 'Osaka, Nhật Bản, là thành phố sôi động nổi tiếng với ẩm thực đường phố, lâu đài lịch sử và trung tâm mua sắm nhộn nhịp.', 30),
-('3', 'Quốc tế', 'Pháp', 'HN5C0BVE', 'Tháp Eiffel', 'Tháp Eiffel là biểu tượng nổi tiếng của Paris, Pháp, với kiến trúc thép cao vút và tầm nhìn toàn thành phố.', 30);
+('3', 'Quốc tế', 'Pháp', 'HN5C0BVE', 'Tháp Eiffel', 'Tháp Eiffel là biểu tượng nổi tiếng của Paris, Pháp, với kiến trúc thép cao vút và tầm nhìn toàn thành phố.', 30),
+('6', 'Nội địa', 'Tour Miền Tây Sông Nước 4 ngày 3 đêm', 'MT4D3N', 'Cần Thơ', 'Khám phá cuộc sống sông nước và ẩm thực đặc sắc của Đồng bằng Sông Cửu Long.', 30);
 
 -- --------------------------------------------------------
 
@@ -369,7 +398,8 @@ CREATE TABLE `tour_prices` (
 INSERT INTO `tour_prices` (`tour_id`, `adult_price`, `child_price`) VALUES
 ('1', 5500000, 3000000),
 ('2', 7500000, 4200000),
-('3', 12000000, 8700000);
+('3', 12000000, 8700000),
+('6', 4000000, 2500000);
 
 -- --------------------------------------------------------
 
@@ -404,7 +434,11 @@ INSERT INTO `tour_schedules` (`id`, `tour_id`, `day`, `activity`) VALUES
 (13, '3', 3, 'Tham quan Bảo tàng Anh (British Museum) và Quảng trường Trafalgar'),
 (14, '3', 4, 'Đi tàu đến Paris – Tham quan Tháp Eiffel'),
 (15, '3', 5, 'Bảo tàng Louvre và Khải Hoàn Môn'),
-(16, '3', 6, 'Tự do mua sắm và trở về');
+(16, '3', 6, 'Tự do mua sắm và trở về'),
+(17, '6', 1, 'TP.HCM - Cần Thơ: Thăm Cầu Cần Thơ, nhận phòng khách sạn.'),
+(18, '6', 2, 'Cần Thơ: Chợ nổi Cái Răng, nhà cổ Bình Thủy, vườn trái cây.'),
+(19, '6', 3, 'An Giang - Châu Đốc: Rừng tràm Trà Sư, Làng Chăm.'),
+(20, '6', 4, 'Trở về TP.HCM và kết thúc tour.');
 
 -- --------------------------------------------------------
 
@@ -450,7 +484,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `username`, `phone`, `genre`, `role`, `avatar`) VALUES
-('1', 'daing@gmail.com', '$2y$10$0RuVGVYUibJtvJWDnGmMge47ABuhs0DLTfmUtNbKkKD5S7hrnZfK2', 'Nguyễn Xuân Quảng', '0981045365', NULL, 'admin', 'https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg');
+('1', 'admin@gmail.com', '$2a$10$ldA978ZAxWW2DnGtdVv2IuIvlLFr7FXj/uJxJKI1SFa7e1pUsYnfq', 'Admin', '0912345678', 'Ẩn danh', 'admin', 'https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg'),
+('2fdsVEe', 'tavantruog1702@gmail.com', '$2a$10$KWz2lzMxctjbgmxGT.Sj6OM8r52BK.ecDl3h16y27nwvXhi.Vtv/m', 'Tạ Văn Trường', '0362422418', 'Nam', 'user', 'https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg'),
+('693117e87d903', 'admin1@gmail.com', '$2y$10$.qACP8uMiPY1J/wGf7.QTe/KnpNgKYGn/JqZbej9y4r95Y5HTwN1O', 'admin', '0969778516', NULL, 'admin', 'https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg'),
+('69312ad899c34', 'daing@gmail.com', '$2y$10$Rt3ptxr3lIkYSsYOUFfB4.f7I0HTrsdcmuW4Mvbiw4NnYcflFyEiu', 'admin3', '0981045365', NULL, 'admin', 'https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg'),
+('CjPp9fs', 'ddao51531@gmail.com', '$2a$10$b3qvXbmgAJ38kp1qE5BXZuNqUX5fDWAGRVtPo3ZmFIGiQf.xdrzRG', 'Đào Đức Anh', '0969778516', 'Nam', 'user', 'https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg'),
+('G31noYO', 'tavantruog1702@gamil.com', '$2a$10$u/BNIA5OI245TtloCmVYl.KzP2L5dFk9XffxQ52TXFlEI4g7tybDa', 'Admin', '0123456789', 'Nữ', 'user', 'https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg');
 
 --
 -- Indexes for dumped tables
@@ -517,6 +556,13 @@ ALTER TABLE `guideslog_images`
 --
 ALTER TABLE `notes`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `bookingId` (`bookingId`);
 
 --
 -- Indexes for table `revenues`
@@ -591,7 +637,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `checkins`
 --
 ALTER TABLE `checkins`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `customers`
@@ -600,10 +646,16 @@ ALTER TABLE `customers`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT for table `tour_schedules`
 --
 ALTER TABLE `tour_schedules`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- Constraints for dumped tables
@@ -653,6 +705,12 @@ ALTER TABLE `guideslogs`
 --
 ALTER TABLE `guideslog_images`
   ADD CONSTRAINT `guideslog_images_ibfk_1` FOREIGN KEY (`log_id`) REFERENCES `guideslogs` (`id`);
+
+--
+-- Constraints for table `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`bookingId`) REFERENCES `bookings` (`id`);
 
 --
 -- Constraints for table `revenues`
