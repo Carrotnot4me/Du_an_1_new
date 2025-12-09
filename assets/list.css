@@ -2,7 +2,7 @@
   --sidebar-bg: #7b5e2a;
   --accent: #f5c542;
   --panel: #fdf8e6;
-  --sidebar-width: 380px;
+  --sidebar-width: 250px; /* Chiều rộng Sidebar đã thu nhỏ */
 }
 
 body {
@@ -30,7 +30,7 @@ body::before {
   width: var(--sidebar-width);
   background: var(--sidebar-bg);
   color: #fff;
-  padding: 40px 24px;
+  padding: 40px 18px; /* Padding đã được điều chỉnh */
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -78,7 +78,10 @@ body::before {
 }
 
 
-.main { flex: 1; padding: 50px 40px; }
+.main { 
+  flex: 1; 
+  padding: 40px 30px; /* Padding đã được điều chỉnh */
+}
 
 .topbar {
   display: flex; 
@@ -96,9 +99,10 @@ body::before {
   border: 1px solid #f1e2b5;
 }
 
+/* SỬA QUAN TRỌNG: Thay đổi layout từ 2 cột sang 3 cột */
 .grid { 
   display: grid; 
-  grid-template-columns: repeat(2, 1fr); 
+  grid-template-columns: repeat(3, 1fr); 
   gap: 20px; 
 }
 
@@ -211,7 +215,7 @@ body::before {
 }
 
 @media(max-width: 900px) {
-  .sidebar { position: fixed; left: -380px; transition: left 0.3s; z-index: 50; }
+  .sidebar { position: fixed; left: -250px; transition: left 0.3s; z-index: 50; }
   .sidebar.open { left: 0; }
   .main { padding: 20px; }
 }

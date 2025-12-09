@@ -7,28 +7,32 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="/assets/list.css">
+  <link rel="stylesheet" href="./assets/list.css">
 </head>
 <body>
 <div class="app">
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="logo">
-      <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
-      <div><div>AdminPanel</div><small style="opacity:.8">v1.0</small></div>
+        <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
+        <div><div>AdminPanel</div><small style="opacity:.8">v1.0</small></div>
     </div>
     <nav>
-      <div class="nav-item active"><i class="bi bi-airplane"></i> Quản lý Tour</div>
-      <div class="nav-item"><i class="bi bi-calendar-check"></i> Đợt khởi hành</div>
-      <div class="nav-item"><i class="bi bi-bookmark-check"></i> Đặt chỗ</div>
-      <div class="nav-item"><i class="bi bi-people-fill"></i> Khách hàng</div>
-      <div class="nav-item"><i class="bi bi-person-badge"></i> Hướng dẫn viên</div>
+        <a class="nav-item" href="index.php?action=dashboard"><i class="bi bi-house-door-fill me-2"></i> Trang quản trị</a>
+        <a class="nav-item active" href="index.php?action=tour-list"><i class="bi bi-airplane me-2"></i> Quản lý Tour</a>
+        <a class="nav-item" href="index.php?action=booking-list"><i class="bi bi-calendar-check me-2"></i> Quản lý Booking</a>
+        <a class="nav-item" href="index.php?action=customer-list"><i class="bi bi-people me-2"></i> Quản lý Khách hàng</a>
+        <a class="nav-item" href="index.php?action=supplier-list"><i class="bi bi-building me-2"></i> Quản lý Nhà Cung Cấp</a>
+        <a class="nav-item" href="index.php?action=guide-logs"><i class="bi bi-journal-text me-2"></i> Nhật ký Tour</a>
+        <a class="nav-item" href="index.php?action=guide-special"><i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt</a>
+        <a class="nav-item" href="index.php?action=special-notes"><i class="bi bi-sticky me-2"></i> Ghi chú đặc biệt</a>
+        <a class="nav-item" href="index.php?action=revenue-report"><i class="bi bi-currency-dollar me-2"></i> Báo cáo Doanh thu</a>
     </nav>
     <div style="margin-top:auto;font-size:13px;opacity:.9">
-      <div>Người dùng: <strong>Admin</strong></div>
-      <div style="margin-top:6px">Email: <small>admin@example.com</small></div>
+        <div>Người dùng: <strong>Admin</strong></div>
+        <div style="margin-top:6px">Email: <small>admin@example.com</small></div>
     </div>
-  </aside>
+</aside>
 
   <!-- MAIN -->
   <main class="main">
