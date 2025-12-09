@@ -1,6 +1,6 @@
 
 <?php
-require_once './commons/function.php';
+require_once __DIR__ . '/../commons/function.php';
 
 class RevenueReportModel {
     private $conn;

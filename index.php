@@ -1,4 +1,11 @@
 <?php
+// index.php - FILE QUAN TRỌNG NHẤT CỦA DỰ ÁN (ROUTER)
+
+// 1. BẮT BUỘC – chỉ require 1 lần
+require_once __DIR__ . '/commons/env.php';
+require_once __DIR__ . '/commons/function.php';
+
+// 2. SESSION + AUTOLOADER THẦN THÁNH (giữ lại bản ngon nhất)
 session_start();
 
 require_once './commons/env.php';
@@ -111,6 +118,89 @@ switch ($action) {
     case 'deleteTour':
         authGuard();
         $tourController->delete();
+        break;
+    case 'tourDetail':
+        $tourController->detail();
+        break;
+    case 'editTour':
+        $tourController->edit();
+        break;
+    case 'updateTour':
+        $tourController->update();
+        break;
+
+    // --- BOOKING ACTIONS ---
+    case 'booking-list':
+        $bookingController->list();
+        break;
+    case 'getBookings':
+        $bookingController->getBookings();
+        break;
+    case 'updateBookingStatus':
+        $bookingController->updateStatus();
+        break;
+    case 'getStatuses':
+        $bookingController->getStatuses();
+        break;
+
+    // --- CUSTOMER ACTIONS ---
+    case 'customer-list':
+        $customerController->list();
+        break;
+    case 'getCustomers':
+        $customerController->getCustomers();
+        break;
+    case 'getCustomerDetail':
+        $customerController->getCustomerDetail();
+        break;
+
+    // --- NOTE ACTIONS ---
+    case 'special-notes':
+        $noteController->list();
+        break;
+    case 'getNotes':
+        $noteController->getNotes();
+        break;
+    case 'getNotesByCustomer':
+        $noteController->getNotesByCustomer();
+        break;
+    case 'addNote':
+        $noteController->add();
+        break;
+    case 'updateNote':
+        $noteController->update();
+        break;
+    case 'deleteNote':
+        $noteController->delete();
+        break;
+    case 'getNoteTypes':
+        $noteController->getTypes();
+        break;
+
+    // --- GUIDE SPECIAL (YÊU CẦU ĐẶC BIỆT CỦA KHÁCH) ---
+    case 'guide-special':
+        $guideSpecialController->list();
+        break;
+    case 'getGuideSpecials':
+        $guideSpecialController->getAll();
+        break;
+    case 'getGuideSpecial':
+        $guideSpecialController->getById();
+        break;
+    case 'addGuideSpecial':
+        $guideSpecialController->add();
+        break;
+    case 'updateGuideSpecial':
+        $guideSpecialController->update();
+        break;
+    case 'deleteGuideSpecial':
+        $guideSpecialController->delete();
+        break;
+    case 'getGuideSpecialTypes':
+        $guideSpecialController->getTypes();
+        break;
+    case 'getGuideSpecialCustomers':
+        $guideSpecialController->getCustomersWithRequests();
         break;
 
 
