@@ -10,6 +10,7 @@ require_once './controllers/CustomerController.php';
 require_once './controllers/NoteController.php';
 require_once './controllers/GuideLogController.php';
 require_once './controllers/GuideSpecialController.php';
+require_once './controllers/SupplierController.php';
 
 $action = $_GET['action'] ?? 'dashboard';
 
@@ -21,6 +22,7 @@ $customerController = new CustomerController();
 $noteController = new NoteController();
 $guideLogController = new GuideLogController();
 $guideSpecialController = new GuideSpecialController();
+$supplierController = new SupplierController();
 
 switch ($action) {
     // --- DASHBOARD ACTIONS ---
@@ -161,6 +163,29 @@ switch ($action) {
         break;
     case 'getGuideLogGuides':
         $guideLogController->getGuides();
+        break;
+
+    // --- SUPPLIER ACTIONS ---
+    case 'supplier-list':
+        $supplierController->list();
+        break;
+    case 'getSuppliers':
+        $supplierController->getSuppliers();
+        break;
+    case 'getSupplier':
+        $supplierController->getSupplier();
+        break;
+    case 'addSupplier':
+        $supplierController->add();
+        break;
+    case 'updateSupplier':
+        $supplierController->update();
+        break;
+    case 'deleteSupplier':
+        $supplierController->delete();
+        break;
+    case 'getSupplierServiceTypes':
+        $supplierController->getServiceTypes();
         break;
 
     // --- DEFAULT ACTION ---
