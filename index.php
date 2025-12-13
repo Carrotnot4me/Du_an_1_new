@@ -24,6 +24,7 @@ require_once __DIR__ . '/controllers/GuideSpecialController.php';
 
 require_once __DIR__ . '/controllers/ScheduleController.php';
 require_once __DIR__ . '/controllers/GuideScheduleController.php';
+require_once __DIR__ . '/controllers/SupplierController.php';
 
 $authController          = new AuthController();
 
@@ -43,6 +44,7 @@ $guideSpecialController  = new GuideSpecialController();
 
 $scheduleController      = new ScheduleController();
 $guideScheduleController = new GuideScheduleController();
+$supplierController      = new SupplierController();
 
 function authGuard()
 {
@@ -130,6 +132,22 @@ switch ($action) {
         authGuard();
         $bookingController->list();
         break;
+    case 'booking-add':
+        authGuard();
+        $bookingController->add();
+        break;
+    case 'booking-save':
+        authGuard();
+        $bookingController->save();
+        break;
+    case 'getSchedule':
+        authGuard();
+        $bookingController->getSchedule();
+        break;
+    case 'deleteBooking':
+        authGuard();
+        $bookingController->delete();
+        break;
     // case 'getBookings':
     //     authGuard();
     //     $bookingController->getBookings();
@@ -155,6 +173,36 @@ switch ($action) {
     case 'getCustomerDetail':
         authGuard();
         $customerController->getCustomerDetail();
+        break;
+
+    // Suppliers
+    case 'supplier-list':
+        authGuard();
+        $supplierController->list();
+        break;
+    case 'getSuppliers':
+        authGuard();
+        $supplierController->getSuppliers();
+        break;
+    case 'getSupplier':
+        authGuard();
+        $supplierController->getSupplier();
+        break;
+    case 'addSupplier':
+        authGuard();
+        $supplierController->add();
+        break;
+    case 'updateSupplier':
+        authGuard();
+        $supplierController->update();
+        break;
+    case 'deleteSupplier':
+        authGuard();
+        $supplierController->delete();
+        break;
+    case 'getSupplierServiceTypes':
+        authGuard();
+        $supplierController->getServiceTypes();
         break;
 
     // Notes

@@ -101,9 +101,10 @@
     <h3 style="margin-bottom:22px;color:#4a3512;">Quản lý Booking & Trạng thái</h3>
     <div class="grid">
       <div class="card-panel">
-        <h2 style="float:left;">Tổng số booking: <?= count($bookings ?? []) ?></h2>
-        <div style="clear:both;"></div>
-      </div>
+          <h2 style="float:left;">Tổng số booking: <?= htmlspecialchars($bookingsCount ?? 0) ?></h2>
+          <a href="index.php?action=booking-add" class="btn btn-primary" style="float:right;">+ Tạo booking</a>
+          <div style="clear:both;"></div>
+        </div>
     </div>
 
     <?php
@@ -131,43 +132,73 @@
     ?>
 
     <div style="margin-top:22px" class="card-panel">
-      <table class="table table-hover align-middle">
-        <thead class="table-light">
+      <table class="table">
+        <thead>
           <tr>
             <th>STT</th>
-            <th>Mã Booking</th>
-            <th>Tour</th>
-            <th>Email</th>
-            <th>Số điện thoại</th>
-            <th>Số lượng</th>
+            <th>Loại Tour</th>
+            <th>Tên Tour</th>
             <th>Ngày khởi hành</th>
+            <th>Hình ảnh</th>
+            <th>Số lượng</th>
             <th>Trạng thái</th>
-            <th>Tổng tiền</th>
             <th>Hành động</th>
           </tr>
         </thead>
-        <tbody>
-          <?php if (empty($bookings)): ?>
+        <tbody id="tourTableBody">
+          <?php if (empty($tours) || !is_array($tours)): ?>
             <tr>
-              <td colspan="10" class="text-center text-muted">Chưa có booking nào</td>
+              <td colspan="7" style="text-align:center;color:#999;">Không có tour nào</td>
             </tr>
           <?php else: ?>
-            <?php foreach ($bookings as $index => $booking): ?>
+            <?php foreach ($tours as $i => $t): ?>
+              <?php
+                // $t may be associative array from getTourSummaries()
+                $img = $t['image_url'] ?? '';
+                $totalQty = $t['total_quantity'] ?? 0;
+                $statuses = $t['statuses'] ?? '';
+              ?>
               <tr>
-                <th scope="row"><?= $index + 1 ?></th>
-                <td><?= htmlspecialchars($booking->id ?? '') ?></td>
-                <td><?= htmlspecialchars($booking->tour_name ?? '') ?> <small class="text-muted">(<?= htmlspecialchars($booking->tour_type ?? '') ?>)</small></td>
-                <td><?= htmlspecialchars($booking->email ?? '') ?></td>
-                <td><?= htmlspecialchars($booking->phone ?? '') ?></td>
-                <td><?= $booking->quantity ?? 0 ?></td>
-                <td><?= formatDate($booking->departureDate ?? null) ?></td>
-                <td><?= getStatusBadge($booking->status ?? '') ?></td>
-                <td><?= formatCurrency($booking->total_amount ?? 0) ?></td>
+                <td><?= $i + 1 ?></td>
+                <td><?= htmlspecialchars($t['type'] ?? '') ?></td>
+                <td><?= htmlspecialchars($t['name'] ?? '') ?></td>
                 <td>
-                  <button onclick="openUpdateStatusModal('<?= htmlspecialchars($booking->id) ?>', '<?= htmlspecialchars($booking->status ?? '') ?>')" 
-                          class="btn btn-sm btn-primary" title="Cập nhật trạng thái">
-                    <i class="bi bi-pencil"></i>
-                  </button>
+                  <?php
+                    $ds = $t['departure_start'] ?? $t['departureDate'] ?? null;
+                    $de = $t['departure_end'] ?? null;
+                    if ($ds) {
+                      echo htmlspecialchars(date('d/m/Y', strtotime($ds)));
+                      if ($de) echo ' - ' . htmlspecialchars(date('d/m/Y', strtotime($de)));
+                    } else {
+                      echo '-';
+                    }
+                  ?>
+                </td>
+                <td><?= $img ? '<img src="' . htmlspecialchars($img) . '" style="width:80px;height:50px;object-fit:cover;border-radius:4px;">' : '—' ?></td>
+                <td>
+                  <?php
+                    $max = isset($t['max_people']) ? (int)$t['max_people'] : 0;
+                    if ($max > 0) {
+                      echo (int)$totalQty . ' / ' . $max;
+                    } else {
+                      echo (int)$totalQty;
+                    }
+                  ?>
+                </td>
+                <td><?= htmlspecialchars($statuses ?: '-') ?></td>
+                <td>
+                  <?php
+                    // Prefer departure_id when present (summary grouped by departure)
+                    $depId = $t['departure_id'] ?? null;
+                    $linkId = $depId ?: ($t['tour_id'] ?? $t['id'] ?? '');
+                    $linkParam = $depId ? 'departure_id' : 'tour_id';
+                  ?>
+                  <a href="index.php?action=booking-list&<?= $linkParam ?>=<?= urlencode($linkId) ?>" class="btn btn-sm btn-info me-1" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                  <form method="POST" action="index.php?action=deleteBooking" style="display:inline">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($linkId) ?>">
+                    <input type="hidden" name="mode" value="<?= $depId ? 'by_departure' : 'by_tour' ?>">
+                    <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Bạn muốn xóa tất cả booking cho mục này?')"><i class="bi bi-trash3"></i></button>
+                  </form>
                 </td>
               </tr>
             <?php endforeach; ?>

@@ -19,77 +19,81 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
   <div class="app">
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
-        <div class="logo">
-            <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
-            <div><div>AdminPanel</div><small style="opacity:.8">v1.0</small></div>
+      <div class="logo">
+        <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
+        <div>
+          <div>AdminPanel</div><small style="opacity:.8">v1.0</small>
         </div>
+      </div>
 
-        <nav>
+      <nav>
 
-            <!-- TRANG CHÍNH -->
-            <a class="nav-item active" href="index.php?action=dashboard">
-                <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
-            </a>
+        <!-- TRANG CHÍNH -->
+        <a class="nav-item active" href="index.php?action=dashboard">
+          <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
+        </a>
 
-            <!-- QUẢN LÝ TOUR -->
-            <div class="nav-group">QUẢN LÝ TOUR</div>
+        <!-- QUẢN LÝ TOUR -->
 
-            <a class="nav-item" href="index.php?action=tour-list">
-                <i class="bi bi-airplane me-2"></i> Danh sách Tour
-            </a>
+        <a class="nav-item" href="index.php?action=tour-list">
+          <i class="bi bi-airplane me-2"></i> Danh sách Tour
+        </a>
+        <a class="nav-item" href="index.php?action=customer-list"><i class="bi bi-people me-2"></i> Quản lý Khách hàng</a>
 
-            <a class="nav-item" href="index.php?action=guide-logs">
-                <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
-            </a>
+        <a class="nav-item" href="index.php?action=supplier-list">
+          <i class="bi bi-building me-2"></i> Quản lý Nhà Cung Cấp
+        </a>
 
-            <a class="nav-item" href="index.php?action=booking-list">
-                <i class="bi bi-calendar-check me-2"></i> Booking
-            </a>
+        <a class="nav-item" href="index.php?action=guide-logs">
+          <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
+        </a>
 
-            <a class="nav-item" href="index.php?action=checkin">
-                <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
-            </a>
+        <a class="nav-item" href="index.php?action=booking-list">
+          <i class="bi bi-calendar-check me-2"></i> Booking
+        </a>
 
-            <!-- HƯỚNG DẪN VIÊN -->
-            <div class="nav-group">HƯỚNG DẪN VIÊN</div>
+        <a class="nav-item" href="index.php?action=checkin">
+          <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
+        </a>
 
-            <a class="nav-item" href="index.php?action=guides">
-                <i class="bi bi-person-badge-fill me-2"></i> Danh sách HDV
-            </a>
 
-            <a class="nav-item" href="index.php?action=schedule-assign">
-                <i class="bi bi-calendar-event me-2"></i> Phân công lịch
-            </a>
+        <!-- HƯỚNG DẪN VIÊN -->
 
-            <a class="nav-item" href="index.php?action=guide-schedule">
-                <i class="bi bi-list-check me-2"></i> Lịch HDV
-            </a>
+        <a class="nav-item" href="index.php?action=guides">
+          <i class="bi bi-person-badge-fill me-2"></i> Danh sách HDV
+        </a>
 
-            <!-- BÁO CÁO -->
-            <div class="nav-group">BÁO CÁO</div>
+        <a class="nav-item" href="index.php?action=schedule-assign">
+          <i class="bi bi-calendar-event me-2"></i> Phân công lịch
+        </a>
 
-            <a class="nav-item" href="index.php?action=revenue-report">
-                <i class="bi bi-currency-dollar me-2"></i> Doanh thu
-            </a>
+        <a class="nav-item" href="index.php?action=guide-schedule">
+          <i class="bi bi-list-check me-2"></i> Lịch HDV
+        </a>
 
-            <!-- KHÁC -->
-            <div class="nav-group">KHÁC</div>
+        <!-- BÁO CÁO -->
 
-            <a class="nav-item" href="index.php?action=guide-special">
-                <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
-            </a>
+        <a class="nav-item" href="index.php?action=revenue-report">
+          <i class="bi bi-currency-dollar me-2"></i> Doanh thu
+        </a>
 
-            <a class="nav-item" href="index.php?action=special-notes">
-                <i class="bi bi-sticky me-2"></i> Ghi chú
-            </a>
+        <!-- KHÁC -->
 
-        </nav>
+        <a class="nav-item" href="index.php?action=guide-special">
+          <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
+        </a>
 
-        <?php $user = $_SESSION['user'] ?? null; ?>
-        <div style="margin-top:auto;font-size:13px;opacity:.9">
-            <div>Người dùng: <strong><?php echo $user['username'] ?? 'Admin'; ?></strong></div>
-            <div style="margin-top:6px">Email: <small><?php echo $user['email'] ?? 'admin@example.com'; ?></small></div>
-        </div>
+        <a class="nav-item" href="index.php?action=special-notes">
+          <i class="bi bi-sticky me-2"></i> Ghi chú
+        </a>
+
+      </nav>
+
+      <?php $user = $_SESSION['user'] ?? null; ?>
+      <div style="margin-top:auto;font-size:13px;opacity:.9">
+        <div>Người dùng: <strong><?php echo $user['username'] ?? 'Admin'; ?></strong></div>
+        <div style="margin-top:6px">Email: <small><?php echo $user['email'] ?? 'admin@example.com'; ?></small></div>
+      </div>
     </aside>
 
     <!-- MAIN CONTENT -->
@@ -99,12 +103,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
         <div class="me-2">VI</div>
         <div class="btn btn-light btn-sm"><i class="bi bi-bell"></i></div>
         <div class="dropdown" style="position:relative;">
-<?php
-    $avatar = $_SESSION['user_avatar'] ?? '';
-    if (empty($avatar)) {
-        $avatar = 'https://ui-avatars.com/api/?name=User&background=random';
-    }
-?>
+          <?php
+          $avatar = $_SESSION['user_avatar'] ?? '';
+          if (empty($avatar)) {
+            $avatar = 'https://ui-avatars.com/api/?name=User&background=random';
+          }
+          ?>
           <img src="<?= htmlspecialchars($avatar) ?>"
             alt="Avatar"
             id="avatarBtn"
@@ -114,7 +118,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
             aria-expanded="false">
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="avatarBtn" style="min-width:150px;">
             <li><a class="dropdown-item" href="?action=profile">📋 Hồ sơ</a></li>
-            <li><hr class="dropdown-divider"></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
             <li><a class="dropdown-item text-danger" href="?action=logout">🚪 Đăng xuất</a></li>
           </ul>
         </div>
@@ -124,46 +130,46 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
       <div class="grid">
         <div class="card-panel">
-<h2 id="total-departures" style="float:left;">Số tour hiện có: <?= count($tours) ?></h2>          <button class="btn btn-success" style="float: right;" data-bs-toggle="modal" data-bs-target="#addTourModal">+
-            Thêm mới</button>
+          <h2 id="total-departures" style="float:left;">Số tour hiện có: <?= count($tours) ?></h2> 
+          <button class="btn btn-success" style="float: right;" data-bs-toggle="modal" data-bs-target="#addTourModal"> + Thêm mới</button>
           <div style="clear: both;"></div>
         </div>
         <div class="card-panel">
           <button id="btnToggleFilter" class="btn btn-outline-primary" style="width:100%; margin-bottom:12px;">▼ Hiện bộ lọc</button>
           <div id="filterPanel" style="display:none;">
-          <h5>Lọc</h5>
-          <div style="margin-top:15px;">
-            <label style="font-weight:600; margin-bottom:8px; display:block;">Loại Tour</label>
-            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:15px;">
-              <label style="display:flex; align-items:center;">
-                <input type="checkbox" class="filterTypeCheckbox" value="Nội địa" style="margin-right:6px;">
-                Nội địa
-              </label>
-              <label style="display:flex; align-items:center;">
-                <input type="checkbox" class="filterTypeCheckbox" value="Quốc tế" style="margin-right:6px;">
-                Quốc tế
-              </label>
-              <label style="display:flex; align-items:center;">
-                <input type="checkbox" class="filterTypeCheckbox" value="Theo yêu cầu" style="margin-right:6px;">
-                Theo yêu cầu
-              </label>
-            </div>
-
-            <label style="font-weight:600; margin-bottom:8px; display:block;">Giá (VNĐ)</label>
-            <div style="display:flex; gap:10px; align-items:end; margin-bottom:15px;">
-              <div style="flex:1;">
-                <label style="font-size:0.9rem; display:block; margin-bottom:4px;">Giá tối thiểu</label>
-                <input type="number" id="priceMin" class="form-control" placeholder="0" min="0">
+            <h5>Lọc</h5>
+            <div style="margin-top:15px;">
+              <label style="font-weight:600; margin-bottom:8px; display:block;">Loại Tour</label>
+              <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:15px;">
+                <label style="display:flex; align-items:center;">
+                  <input type="checkbox" class="filterTypeCheckbox" value="Nội địa" style="margin-right:6px;">
+                  Nội địa
+                </label>
+                <label style="display:flex; align-items:center;">
+                  <input type="checkbox" class="filterTypeCheckbox" value="Quốc tế" style="margin-right:6px;">
+                  Quốc tế
+                </label>
+                <label style="display:flex; align-items:center;">
+                  <input type="checkbox" class="filterTypeCheckbox" value="Theo yêu cầu" style="margin-right:6px;">
+                  Theo yêu cầu
+                </label>
               </div>
-              <div style="flex:1;">
-                <label style="font-size:0.9rem; display:block; margin-bottom:4px;">Giá tối đa</label>
-                <input type="number" id="priceMax" class="form-control" placeholder="999999999" min="0">
-              </div>
-            </div>
 
-            <button id="btnFilter" class="btn btn-primary" style="width:100%;">🔍 Tìm kiếm</button>
-            <button id="btnResetFilter" class="btn btn-secondary" style="width:100%; margin-top:8px;">↻ Xoá bộ lọc</button>
-          </div>
+              <label style="font-weight:600; margin-bottom:8px; display:block;">Giá (VNĐ)</label>
+              <div style="display:flex; gap:10px; align-items:end; margin-bottom:15px;">
+                <div style="flex:1;">
+                  <label style="font-size:0.9rem; display:block; margin-bottom:4px;">Giá tối thiểu</label>
+                  <input type="number" id="priceMin" class="form-control" placeholder="0" min="0">
+                </div>
+                <div style="flex:1;">
+                  <label style="font-size:0.9rem; display:block; margin-bottom:4px;">Giá tối đa</label>
+                  <input type="number" id="priceMax" class="form-control" placeholder="999999999" min="0">
+                </div>
+              </div>
+
+              <button id="btnFilter" class="btn btn-primary" style="width:100%;">🔍 Tìm kiếm</button>
+              <button id="btnResetFilter" class="btn btn-secondary" style="width:100%; margin-top:8px;">↻ Xoá bộ lọc</button>
+            </div>
           </div>
         </div>
       </div>
@@ -183,35 +189,36 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
             </tr>
           </thead>
           <tbody id="tourTableBody">
-<?php
-if (!empty($tours) && is_array($tours)):
-    $i = 1;
-    foreach ($tours as $t):
-        $img = '';
-        if (!empty($t['images']) && is_array($t['images'])) $img = $t['images'][0] ?? '';
-        $priceText = isset($t['price']['adult']) ? number_format($t['price']['adult'], 0, ',', '.') . ' đ' : '—';
-?>
-            <tr>
-              <td><?= $i++ ?></td>
-              <td><?= htmlspecialchars($t['type'] ?? '') ?></td>
-              <td><?= htmlspecialchars($t['name'] ?? '') ?></td>
-              <td><?= htmlspecialchars($t['main_destination'] ?? '') ?></td>
-              <td><?= $img ? '<img src="'.htmlspecialchars($img).'" style="width:80px;height:50px;object-fit:cover;border-radius:4px;">' : '—' ?></td>
-              <td><?= htmlspecialchars($t['tour_code'] ?? '') ?></td>
-              <td><?= $priceText ?></td>
-              <td>
-                <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>?action=deleteTour" style="display:inline">
-                  <input type="hidden" name="id" value="<?= htmlspecialchars($t['id'] ?? '') ?>">
-                  <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Bạn muốn xóa?')"><i class="bi bi-trash3"></i></button>
-                </form>
-                <a href="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>?action=editTour&id=<?= htmlspecialchars($t['id'] ?? '') ?>" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
-              </td>
-            </tr>
-    <?php endforeach; else: ?>
-            <tr>
-              <td colspan="8" style="text-align:center;color:#999;">Không có tour nào</td>
-            </tr>
-<?php endif; ?>
+            <?php
+            if (!empty($tours) && is_array($tours)):
+              $i = 1;
+              foreach ($tours as $t):
+                $img = '';
+                if (!empty($t['images']) && is_array($t['images'])) $img = $t['images'][0] ?? '';
+                $priceText = isset($t['price']['adult']) ? number_format($t['price']['adult'], 0, ',', '.') . ' đ' : '—';
+            ?>
+                <tr>
+                  <td><?= $i++ ?></td>
+                  <td><?= htmlspecialchars($t['type'] ?? '') ?></td>
+                  <td><?= htmlspecialchars($t['name'] ?? '') ?></td>
+                  <td><?= htmlspecialchars($t['main_destination'] ?? '') ?></td>
+                  <td><?= $img ? '<img src="' . htmlspecialchars($img) . '" style="width:80px;height:50px;object-fit:cover;border-radius:4px;">' : '—' ?></td>
+                  <td><?= htmlspecialchars($t['tour_code'] ?? '') ?></td>
+                  <td><?= $priceText ?></td>
+                  <td>
+                    <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>?action=deleteTour" style="display:inline">
+                      <input type="hidden" name="id" value="<?= htmlspecialchars($t['id'] ?? '') ?>">
+                      <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Bạn muốn xóa?')"><i class="bi bi-trash3"></i></button>
+                    </form>
+                    <a href="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>?action=editTour&id=<?= htmlspecialchars($t['id'] ?? '') ?>" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
+                  </td>
+                </tr>
+              <?php endforeach;
+            else: ?>
+              <tr>
+                <td colspan="8" style="text-align:center;color:#999;">Không có tour nào</td>
+              </tr>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -275,7 +282,7 @@ if (!empty($tours) && is_array($tours)):
                 placeholder="Nhập mô tả tour..."></textarea>
             </div>
 
-            
+
             <!-- GIÁ TIỀN -->
             <h6
               style="color:#3b2a0a; font-weight:700; margin-bottom:15px; margin-top:25px; border-left:5px solid #f5c542; padding-left:10px;">
@@ -396,7 +403,7 @@ if (!empty($tours) && is_array($tours)):
     const btnToggleFilter = document.getElementById('btnToggleFilter');
     const filterPanel = document.getElementById('filterPanel');
     let filterVisible = false;
-    
+
     btnToggleFilter.addEventListener('click', () => {
       filterVisible = !filterVisible;
       filterPanel.style.display = filterVisible ? 'block' : 'none';
@@ -450,7 +457,12 @@ if (!empty($tours) && is_array($tours)):
     function escapeHtml(s) {
       if (!s) return '';
       return String(s)
-        .replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c] || c));
+        .replace(/[&<>"]/g, c => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;'
+        } [c] || c));
     }
 
     document.getElementById('btnFilter').addEventListener('click', applyFilters);
@@ -468,11 +480,11 @@ if (!empty($tours) && is_array($tours)):
     });
 
     // Minimal client code to allow adding schedule items (keeps UI unchanged)
-    (function(){
+    (function() {
       const addBtn = document.getElementById('addScheduleBtn');
       const container = document.getElementById('scheduleContainer');
       if (!addBtn || !container) return;
-      addBtn.addEventListener('click', function(){
+      addBtn.addEventListener('click', function() {
         const node = document.createElement('div');
         node.className = 'schedule-item mb-3 p-3';
         node.style.background = '#f9f7f0';
