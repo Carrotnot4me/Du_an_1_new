@@ -12,7 +12,7 @@
 
 <body>
     <div class="app">
-        <!-- trang sidebar -->
+
         <aside class="sidebar" id="sidebar">
         <div class="logo">
             <div style="width:44px;height:44px;background:#f5c542;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3b2a0a;font-weight:700">AD</div>
