@@ -151,7 +151,7 @@
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
-    <form id="bookingForm" action="index.php?controller=booking&action=save" method="POST">
+    <form id="bookingForm" action="index.php?action=booking-save" method="POST">
 
         <!-- THÔNG TIN TOUR – ĐÃ THÊM HƯỚNG DẪN VIÊN VÀO GIỮA -->
         <div class="card-custom">
@@ -267,8 +267,9 @@
                             <td><input type="text" class="form-control form-control-sm" name="phone[]" placeholder="0901234567"></td>
                             <td>
                                 <div class="qty-stack">
-                                    <input type="number" class="form-control form-control-sm text-center qty-input qty-child" name="quantity_child[]" value="0" min="0" style="margin-bottom:6px;">
-                                    <input type="number" class="form-control form-control-sm text-center qty-input qty-adult" name="quantity_adult[]" value="1" min="0">
+                                    <input type="number" class="form-control form-control-sm text-center qty-input qty-child" name="quantity_child[]" min="0" placeholder="Số lượng trẻ nhỏ" style="margin-bottom:6px;">
+                                    <input type="number" class="form-control form-control-sm text-center qty-input qty-adult" name="quantity_adult[]"
+                                    placeholder="Số lượng người lớn" min="0">
                                 </div>
                             </td>
                             <td class="row-subtotal">0 ₫</td>
@@ -298,11 +299,8 @@
                     TỔNG TIỀN: <span id="totalAmount">0 ₫</span>
                 </div>
                 <div style="font-size:0.95rem; margin-top:12px; color:#333; display:flex; gap:12px; align-items:center; justify-content:flex-end;">
-                    <div>Phí phát sinh (20%): <strong id="surchargeAmount">0 ₫</strong></div>
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <label for="extraFee" style="margin:0; font-weight:600;">Phát sinh khác:</label>
-                        <input id="extraFee" type="number" min="0" value="0" style="width:140px; border-radius:8px; padding:6px 8px; font-weight:600; text-align:right;">
-                    </div>
+                    <div>Phí phát sinh (10%): <strong id="surchargeAmount">0 ₫</strong></div>
+                    <!-- Extra fee input removed by request -->
                 </div>
                 <div id="totalNotice" style="margin-top:8px; color:#d9534f; font-weight:600; text-align:right; display:none;"></div>
             </div>
@@ -409,7 +407,7 @@ function updateTotal() {
     document.getElementById('rowSubtotalSum').textContent = formatVnd(baseTotal);
 
     // surcharge 20%
-    const surcharge = Math.round(baseTotal * 0.2);
+    const surcharge = Math.round(baseTotal * 0.1);
     const extra = parseInt(document.getElementById('extraFee')?.value) || 0;
     const grandTotal = baseTotal + surcharge + extra;
 
@@ -538,8 +536,9 @@ document.getElementById('addCustomer').addEventListener('click', () => {
     updateTotal();
 });
 
-// extra fee change
-document.getElementById('extraFee').addEventListener('input', updateTotal);
+// extra fee change (guarded in case the element was removed)
+const __extraFeeEl = document.getElementById('extraFee');
+if (__extraFeeEl) __extraFeeEl.addEventListener('input', updateTotal);
 
 // Attach events to existing rows on load
 document.querySelectorAll('.customer-row').forEach(r => {

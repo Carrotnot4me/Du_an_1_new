@@ -132,6 +132,22 @@ switch ($action) {
         authGuard();
         $bookingController->list();
         break;
+    case 'booking-add':
+        authGuard();
+        $bookingController->add();
+        break;
+    case 'booking-save':
+        authGuard();
+        $bookingController->save();
+        break;
+    case 'getSchedule':
+        authGuard();
+        $bookingController->getSchedule();
+        break;
+    case 'deleteBooking':
+        authGuard();
+        $bookingController->delete();
+        break;
     // case 'getBookings':
     //     authGuard();
     //     $bookingController->getBookings();
