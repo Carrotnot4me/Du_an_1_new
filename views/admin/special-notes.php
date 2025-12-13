@@ -23,9 +23,14 @@
             <a class="nav-item " href="index.php?action=dashboard">
                 <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
             </a>
+
+            <!-- QUẢN LÝ TOUR -->
+            <div class="nav-group">QUẢN LÝ TOUR</div>
+
             <a class="nav-item" href="index.php?action=tour-list">
                 <i class="bi bi-airplane me-2"></i> Danh sách Tour
             </a>
+
             <a class="nav-item" href="index.php?action=guide-logs">
                 <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
             </a>

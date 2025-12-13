@@ -297,12 +297,12 @@
       <!-- DESCRIPTION SECTION -->
       <div class="info-section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-          <h5 style="margin: 0; color: #4a3512;">
+          <!-- <h5 style="margin: 0; color: #4a3512;">
             <i class="bi bi-list-ul me-2"></i>Mô tả
           </h5>
           <button class="btn btn-sm btn-primary" onclick="editDescription()">Chỉnh sửa</button>
-        </div>
-        <div class="description-box" id="descriptionBox">
+        </div> -->
+        <!-- <div class="description-box" id="descriptionBox">
           <div class="description-item">
             <i class="bi bi-folder-fill" style="color: #f5c542;"></i>
             <span><strong>File:</strong> guide-log.php</span>
@@ -331,7 +331,7 @@
             <i class="bi bi-arrow-right-circle" style="color: #000;"></i>
             <span><strong>Tổng quát:</strong> Tập trung vào Logs & Yêu cầu đặc biệt</span>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- LOGS LIST -->
