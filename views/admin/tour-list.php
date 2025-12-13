@@ -32,11 +32,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
             </a>
 
             <!-- QUẢN LÝ TOUR -->
-            <div class="nav-group">QUẢN LÝ TOUR</div>
 
             <a class="nav-item" href="index.php?action=tour-list">
                 <i class="bi bi-airplane me-2"></i> Danh sách Tour
             </a>
+            <a class="nav-item" href="index.php?action=customer-list"><i class="bi bi-people me-2"></i> Quản lý Khách hàng</a>
+        <a class="nav-item" href="index.php?action=supplier-list"><i class="bi bi-building me-2"></i> Quản lý Nhà Cung Cấp</a>
 
             <a class="nav-item" href="index.php?action=guide-logs">
                 <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
@@ -50,8 +51,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                 <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
             </a>
 
+
             <!-- HƯỚNG DẪN VIÊN -->
-            <div class="nav-group">HƯỚNG DẪN VIÊN</div>
 
             <a class="nav-item" href="index.php?action=guides">
                 <i class="bi bi-person-badge-fill me-2"></i> Danh sách HDV
@@ -66,14 +67,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
             </a>
 
             <!-- BÁO CÁO -->
-            <div class="nav-group">BÁO CÁO</div>
 
             <a class="nav-item" href="index.php?action=revenue-report">
                 <i class="bi bi-currency-dollar me-2"></i> Doanh thu
             </a>
 
             <!-- KHÁC -->
-            <div class="nav-group">KHÁC</div>
 
             <a class="nav-item" href="index.php?action=guide-special">
                 <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt

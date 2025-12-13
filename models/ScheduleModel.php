@@ -1,52 +1,41 @@
 <?php
+// File: models/ScheduleModel.php
+
 require_once './commons/function.php';
 
 class ScheduleModel {
-    private $conn;
+    public $conn;
 
     public function __construct() {
-        $this->conn = connectDB();
+        if (function_exists('connectDB')) {
+            try {
+                $this->conn = connectDB();
+            } catch (PDOException $e) {
+                die("Lỗi kết nối DB: " . $e->getMessage());
+            }
+        } else {
+            die("Lỗi: Hàm connectDB() không được tìm thấy.");
+        }
     }
 
-    public function getAllDepartures() {
-        $stmt = $this->conn->prepare("SELECT * FROM departures");
+    public function getDepartures() {
+        // [ĐÃ SỬA]: Lấy t.id thay cho t.code
+        $sql = "
+            SELECT 
+                d.id as departure_id,
+                d.dateStart,
+                d.dateEnd,
+                t.name as tour_name,
+                t.id as tour_id,
+                (SELECT image_url FROM tour_images WHERE tour_id = t.id LIMIT 1) as image
+            FROM departures d
+            JOIN tours t ON d.tourId = t.id
+            ORDER BY d.dateStart ASC
+        ";
+        
+        $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    public function getAllTours() {
-        $stmt = $this->conn->prepare("SELECT * FROM tours");
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    public function getAllStaffs() {
-        $stmt = $this->conn->prepare("SELECT * FROM staffs");
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    public function getGuides() {
-        $staffs = $this->getAllStaffs();
-        $guides = array_filter($staffs, function($s) {
-            $type = strtolower(trim($s['type']));
-            return $type === 'guide' || $type === 'quoc_te' || $type === 'noi_dia';
-        });
-        return array_values($guides);
-    }
-
-    public function getDrivers() {
-        $staffs = $this->getAllStaffs();
-        $drivers = array_filter($staffs, function($s) {
-            $type = strtolower(trim($s['type']));
-            return $type === 'driver';
-        });
-        return array_values($drivers);
-    }
-
-    public function addDeparture($tourId, $date, $guideId, $driverId) {
-        $stmt = $this->conn->prepare("INSERT INTO departures (tourId, date, assignedHDV, assignedDriver) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$tourId, $date, $guideId, $driverId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function updateDeparture($depId, $tourId, $date, $guideId, $driverId) {
