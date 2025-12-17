@@ -138,6 +138,25 @@ class BookingController{
                 'quantity'   => $qty,
                 'status'     => 'Chờ xác nhận'
             ]);
+
+            // persist nested customers into customers table if provided (JSON per-registrant)
+            $registrantId = $this->model->getLastRegistrantId();
+            if (!empty($_POST['customers'][$i])) {
+                require_once __DIR__ . '/../models/CustomerModel.php';
+                $cm = new CustomerModel();
+                $raw = $_POST['customers'][$i];
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    foreach ($decoded as $c) {
+                        $cn = trim($c['name'] ?? '');
+                        if ($cn === '') continue;
+                        $cd = !empty($c['date']) ? $c['date'] : null;
+                        $cg = isset($c['gender']) ? $c['gender'] : null;
+                        $note = isset($c['note']) ? $c['note'] : null;
+                        $cm->add($registrantId, $cn, $cd, $cg, $note);
+                    }
+                }
+            }
         }
 
         $_SESSION['success'] = "Đặt tour thành công – Mã booking: <b>$newId</b>";
@@ -179,6 +198,227 @@ class BookingController{
         $tours = $this->model->getTourSummaries();
         $bookingsCount = $this->model->getTotalBookingsCount();
         require_once __DIR__ . '/../views/admin/booking-list.php';
+    }
+
+    /**
+     * Booking detail - show one booking and its registrants
+     */
+    public function detail(){
+        $bookingId = $_GET['booking_id'] ?? null;
+        $departureId = $_GET['departure_id'] ?? null;
+        $tourId = $_GET['tour_id'] ?? null;
+
+        // If booking_id not provided, try to resolve from departure_id or tour_id
+        if (!$bookingId) {
+            if ($departureId) {
+                $bookings = $this->model->getBookingsByDeparture($departureId);
+                if (!empty($bookings)) {
+                    $bookingId = $bookings[0]['id'];
+                }
+            } elseif ($tourId) {
+                $bookings = $this->model->getBookingsByTour($tourId);
+                if (!empty($bookings)) {
+                    $bookingId = $bookings[0]['id'];
+                }
+            }
+        }
+
+        if (!$bookingId) {
+            header('Location: index.php?action=booking-list');
+            exit;
+        }
+
+        $booking = $this->model->getBookingById($bookingId);
+        if (!$booking) {
+            header('Location: index.php?action=booking-list');
+            exit;
+        }
+        // registrants + paid amounts
+        $registrants = $this->model->getRegistrantsByBooking($bookingId);
+        foreach ($registrants as &$r) {
+            $r['paid'] = $this->model->getPaidByRegistrant($r['id']);
+        }
+        unset($r);
+
+        // load tour details, image and schedules for richer view
+        $tourDetail = null;
+        $tourImage = null;
+        $tourSchedules = [];
+        if (!empty($booking['tourId'])) {
+            $tourDetail = $this->model->getTourDetail($booking['tourId']);
+            $tourImage = $this->model->getTourImage($booking['tourId']);
+            $tourSchedules = $this->model->getTourSchedule($booking['tourId']);
+        }
+
+        $paymentsTotal = $this->model->getPaymentsTotalByBooking($bookingId);
+        require_once __DIR__ . '/../views/admin/booking-detail.php';
+    }
+
+    /**
+     * Add a registrant (customer) to a booking
+     */
+    public function addRegistrant(){
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?action=booking-list');
+            exit;
+        }
+
+        $bookingId = $_POST['booking_id'] ?? null;
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $adult = (int)($_POST['adult_count'] ?? 0);
+        $child = (int)($_POST['child_count'] ?? 0);
+        $type = $_POST['type'] ?? null;
+
+        // compute quantity: adults + children, fallback to 1
+        $quantity = max(1, $adult + $child);
+        if (!$type) {
+            $type = ($child > 0) ? 'Gia đình' : 'Cá nhân';
+        }
+
+        if (empty($bookingId) || empty($name)) {
+            $_SESSION['errors'][] = 'Thiếu thông tin khách hàng';
+            header("Location: index.php?action=booking-detail&booking_id=".urlencode($bookingId));
+            exit;
+        }
+
+
+        $this->model->insertCustomer([
+            'booking_id' => $bookingId,
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'type' => $type,
+            'quantity' => $quantity,
+            'adult_count' => $adult,
+            'child_count' => $child,
+            'status' => 'Chờ xác nhận'
+        ]);
+
+        // get inserted registrant id (pattern used elsewhere in the app)
+        $registrantId = $this->model->getLastRegistrantId();
+
+        // Persist nested customers if provided
+        require_once __DIR__ . '/../models/CustomerModel.php';
+        $cm = new CustomerModel();
+
+        // Support JSON payload: 'customers' => JSON string [{name,date,gender},...]
+        if (!empty($_POST['customers'])) {
+            $raw = $_POST['customers'];
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $c) {
+                    $cn = trim($c['name'] ?? '');
+                    if ($cn === '') continue;
+                    $cd = !empty($c['date']) ? $c['date'] : null;
+                    $cg = isset($c['gender']) ? $c['gender'] : null;
+                    $cm->add($registrantId, $cn, $cd, $cg);
+                }
+            }
+        }
+
+        // Or support flat arrays: customer_name[], customer_date[], customer_gender[]
+        elseif (!empty($_POST['customer_name']) && is_array($_POST['customer_name'])) {
+            $names = $_POST['customer_name'];
+            $dates = $_POST['customer_date'] ?? [];
+            $genders = $_POST['customer_gender'] ?? [];
+            foreach ($names as $i => $cn) {
+                $cn = trim($cn);
+                if ($cn === '') continue;
+                $cd = $dates[$i] ?? null;
+                $cg = $genders[$i] ?? null;
+                $cm->add($registrantId, $cn, $cd, $cg);
+            }
+        }
+
+        header("Location: index.php?action=booking-detail&booking_id=".urlencode($bookingId));
+        exit;
+    }
+
+    /**
+     * Process a payment for a registrant: create payment record and update registrant status
+     */
+    public function registrantPayment(){
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?action=booking-list');
+            exit;
+        }
+
+        $registrantId = $_POST['registrant_id'] ?? null;
+        $amount = (float)($_POST['amount'] ?? 0);
+        $method = trim($_POST['method'] ?? '');
+
+        if (empty($registrantId) || $amount <= 0) {
+            $_SESSION['errors'][] = 'Thông tin thanh toán không hợp lệ';
+            header('Location: index.php?action=booking-list');
+            exit;
+        }
+
+        // load registrant and booking
+        $reg = $this->model->getRegistrantById($registrantId);
+        if (!$reg) {
+            $_SESSION['errors'][] = 'Không tìm thấy khách hàng';
+            header('Location: index.php?action=booking-list');
+            exit;
+        }
+
+        $booking = $this->model->getBookingById($reg['booking_id']);
+        if (!$booking) {
+            $_SESSION['errors'][] = 'Không tìm thấy booking';
+            header('Location: index.php?action=booking-list');
+            exit;
+        }
+
+        // compute expected deposit: quantity * adult_price * 0.3 (fallback 0)
+        $qty = (int)($reg['quantity'] ?? 1);
+        $adultPrice = (int)($booking['adult_price'] ?? 0);
+        $expectedDeposit = round($qty * $adultPrice * 0.3);
+
+        // insert payment via RevenueReportModel to payments table (legacy)
+        require_once __DIR__ . '/../models/RevenueReportModel.php';
+        $rev = new RevenueReportModel();
+        $ok = $rev->addPayment($booking['id'], (int)$amount, $method ?: 'Tiền mặt', 'Hoàn thành', NULL);
+
+        // Also persist into payment_history for per-registrant tracking
+        require_once __DIR__ . '/../models/PaymentHistoryModel.php';
+        $ph = new PaymentHistoryModel();
+        $ph->add($registrantId, $booking['id'], (float)$amount, $method ?: 'Tiền mặt', null);
+
+        // determine total paid by registrant and set status accordingly
+        $paidTotal = $this->model->getPaidByRegistrant($registrantId);
+
+        // compute registrant total amount (consider adult/child if present)
+        $qty = (int)($reg['quantity'] ?? 1);
+        $adultPrice = (int)($booking['adult_price'] ?? 0);
+        $childPrice = (int)($booking['child_price'] ?? 0);
+        $regAdult = isset($reg['adult_count']) ? (int)$reg['adult_count'] : null;
+        $regChild = isset($reg['child_count']) ? (int)$reg['child_count'] : null;
+        if ($regAdult !== null || $regChild !== null) {
+            $regAdult = $regAdult ?? 0; $regChild = $regChild ?? 0;
+            $totalExpected = $regAdult * $adultPrice + $regChild * $childPrice;
+            $qty = $regAdult + $regChild;
+        } else {
+            $totalExpected = $qty * $adultPrice;
+        }
+
+        $expectedDeposit = round($totalExpected * 0.3);
+
+        if ($paidTotal >= $totalExpected && $totalExpected > 0) {
+            $newStatus = 'Đã hoàn thành';
+        } elseif ($paidTotal >= $expectedDeposit && $expectedDeposit > 0) {
+            $newStatus = 'Đã cọc';
+        } elseif ($paidTotal > 0) {
+            $newStatus = 'Đang xử lý';
+        } else {
+            $newStatus = 'Chờ xác nhận';
+        }
+
+        $this->model->updateRegistrantStatus($registrantId, $newStatus);
+
+        // redirect back to booking detail
+        header('Location: index.php?action=booking-detail&booking_id=' . urlencode($booking['id']));
+        exit;
     }
 
     /**

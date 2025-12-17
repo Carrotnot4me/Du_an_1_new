@@ -15,7 +15,6 @@ require_once __DIR__ . '/controllers/PaymentController.php';
 require_once __DIR__ . '/controllers/CheckinController.php';
 
 require_once __DIR__ . '/controllers/BookingController.php';
-require_once __DIR__ . '/controllers/CustomerController.php';
 require_once __DIR__ . '/controllers/NoteController.php';
 
 require_once __DIR__ . '/controllers/GuideController.php';
@@ -35,7 +34,6 @@ $paymentController       = new PaymentController();
 $checkinController       = new CheckinController();
 
 $bookingController       = new BookingController();
-$customerController      = new CustomerController();
 $noteController          = new NoteController();
 
 $guideController         = new GuideController();
@@ -143,6 +141,18 @@ switch ($action) {
     case 'getSchedule':
         authGuard();
         $bookingController->getSchedule();
+        break;
+    case 'booking-detail':
+        authGuard();
+        $bookingController->detail();
+        break;
+    case 'add-registrant':
+        authGuard();
+        $bookingController->addRegistrant();
+        break;
+    case 'registrant-payment':
+        authGuard();
+        $bookingController->registrantPayment();
         break;
     case 'deleteBooking':
         authGuard();

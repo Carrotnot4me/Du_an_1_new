@@ -27,7 +27,7 @@
             <!-- QUẢN LÝ TOUR -->
             <div class="nav-group">QUẢN LÝ TOUR</div>
 
-            <a class="nav-item" href="index.php?action=tour-list">
+            <a class="nav-item active" href="index.php?action=tour-list">
                 <i class="bi bi-airplane me-2"></i> Danh sách Tour
             </a>
 
@@ -35,7 +35,7 @@
                 <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
             </a>
 
-            <a class="nav-item active" href="index.php?action=booking-list">
+            <a class="nav-item" href="index.php?action=booking-list">
                 <i class="bi bi-calendar-check me-2"></i> Booking
             </a>
 
@@ -67,6 +67,10 @@
 
             <!-- KHÁC -->
             <div class="nav-group">KHÁC</div>
+            
+            <a class="nav-item" href="index.php?action=supplier-list">
+                <i class="bi bi-building me-2"></i> Quản lý Nhà Cung Cấp
+            </a>
 
             <a class="nav-item" href="index.php?action=guide-special">
                 <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
@@ -124,7 +128,10 @@
             'Đã xác nhận' => 'success',
             'Đã cọc' => 'info',
             'Hoàn thành' => 'success',
-            'Đã hủy' => 'danger'
+        'Đã hủy' => 'danger',
+        'Sắp đi' => 'info',
+        'Đang đi' => 'success',
+        'Đã kết thúc' => 'secondary'
         ];
         $color = $colors[$status] ?? 'secondary';
         return "<span class='badge bg-{$color}'>{$status}</span>";
@@ -185,15 +192,22 @@
                     }
                   ?>
                 </td>
-                <td><?= htmlspecialchars($statuses ?: '-') ?></td>
+                <td>
+                  <?= htmlspecialchars($t['computed_status'] ?? $statuses ?? '-') ?>
+                </td>
                 <td>
                   <?php
                     // Prefer departure_id when present (summary grouped by departure)
                     $depId = $t['departure_id'] ?? null;
-                    $linkId = $depId ?: ($t['tour_id'] ?? $t['id'] ?? '');
-                    $linkParam = $depId ? 'departure_id' : 'tour_id';
+                    $tourId = $t['tour_id'] ?? ($t['id'] ?? null);
                   ?>
-                  <a href="index.php?action=booking-list&<?= $linkParam ?>=<?= urlencode($linkId) ?>" class="btn btn-sm btn-info me-1" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                  <?php if ($depId): ?>
+                    <a href="index.php?action=booking-detail&departure_id=<?= urlencode($depId) ?>" class="btn btn-sm btn-info me-1" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                  <?php elseif ($tourId): ?>
+                    <a href="index.php?action=booking-detail&tour_id=<?= urlencode($tourId) ?>" class="btn btn-sm btn-info me-1" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                  <?php else: ?>
+                    <a href="index.php?action=booking-list" class="btn btn-sm btn-info me-1" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                  <?php endif; ?>
                   <form method="POST" action="index.php?action=deleteBooking" style="display:inline">
                     <input type="hidden" name="id" value="<?= htmlspecialchars($linkId) ?>">
                     <input type="hidden" name="mode" value="<?= $depId ? 'by_departure' : 'by_tour' ?>">

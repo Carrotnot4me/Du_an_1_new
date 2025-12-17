@@ -212,7 +212,7 @@
                 <div class="schedule-item mb-3 p-3" style="background:#f9f7f0; border-radius:6px;">
                   <div class="row mb-2">
                     <div class="col-md-4">
-                      <label class="form-label">Ngày thứ</label>
+                      <label class="form-label">Tuần thứ</label>
                       <input type="number" name="schedule_day[]" class="form-control schedule-day" value="<?= htmlspecialchars($sch['day'] ?? 1) ?>" min="1">
                     </div>
                     <div class="col-md-6">
@@ -230,7 +230,7 @@
               <div class="schedule-item mb-3 p-3" style="background:#f9f7f0; border-radius:6px;">
                 <div class="row mb-2">
                   <div class="col-md-4">
-                    <label class="form-label">Ngày thứ</label>
+                    <label class="form-label">Tuần thứ</label>
                     <input type="number" name="schedule_day[]" class="form-control schedule-day" placeholder="1" min="1">
                   </div>
                   <div class="col-md-6">
@@ -329,7 +329,7 @@
         node.innerHTML = `
           <div class="row mb-2">
             <div class="col-md-4">
-              <label class="form-label">Ngày thứ</label>
+              <label class="form-label">Tuần thứ</label>
               <input type="number" name="schedule_day[]" class="form-control schedule-day" placeholder="1" min="1">
             </div>
             <div class="col-md-6">
