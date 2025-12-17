@@ -260,7 +260,32 @@ class BookingModel {
         $sql = "SELECT * FROM tour_schedules WHERE tour_id = ? ORDER BY day";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$tourId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!$rows) return [];
+
+        // fetch details for all schedule ids
+        $ids = array_map(function($r){ return (int)$r['id']; }, $rows);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $dsql = "SELECT * FROM tour_schedule_details WHERE schedule_id IN ($placeholders) ORDER BY start_time";
+        $dstmt = $this->conn->prepare($dsql);
+        $dstmt->execute($ids);
+        $details = $dstmt->fetchAll(PDO::FETCH_ASSOC);
+        $map = [];
+        foreach ($details as $d) {
+            $sid = (int)$d['schedule_id'];
+            if (!isset($map[$sid])) $map[$sid] = [];
+            $map[$sid][] = $d;
+        }
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[] = [
+                'day' => isset($r['day']) ? (int)$r['day'] : null,
+                'activity' => $r['activity'] ?? null,
+                'details' => $map[(int)$r['id']] ?? []
+            ];
+        }
+        return $out;
     }
 
     /**
@@ -442,18 +467,53 @@ class BookingModel {
                 $cols = [];
             }
 
-            if (in_array('booking_id', $cols)) {
-                $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payment_history WHERE booking_id = ?");
+            // support either snake_case or camelCase column naming
+            $phCol = null;
+            if (in_array('booking_id', $cols)) $phCol = 'booking_id';
+            elseif (in_array('bookingId', $cols)) $phCol = 'bookingId';
+
+            if ($phCol) {
+                $sql = "SELECT COALESCE(SUM(amount),0) AS total FROM payment_history WHERE $phCol = ?";
+                $stmt = $this->conn->prepare($sql);
                 $stmt->execute([$bookingId]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                return (int)($row['total'] ?? 0);
+                return (float)($row['total'] ?? 0);
             }
 
-            // fallback to legacy payments table
-            $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payments WHERE bookingId = ?");
-            $stmt->execute([$bookingId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int)($row['total'] ?? 0);
+            // If payment_history doesn't store booking id directly but stores registrant_id,
+            // sum payments by joining booking_registrants -> bookings
+            if (in_array('registrant_id', $cols) || in_array('registrantId', $cols)) {
+                $regCol = in_array('registrant_id', $cols) ? 'registrant_id' : 'registrantId';
+                $sql = "SELECT COALESCE(SUM(ph.amount),0) AS total
+                        FROM payment_history ph
+                        JOIN booking_registrants br ON ph." . $regCol . " = br.id
+                        WHERE br.booking_id = ?";
+                $stmt = $this->conn->prepare($sql);
+                $stmt->execute([$bookingId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                return (float)($row['total'] ?? 0);
+            }
+
+            // fallback to legacy payments table (handle its column variants too)
+            try {
+                $pcolStmt = $this->conn->query("DESCRIBE payments");
+                $pcols = $pcolStmt->fetchAll(PDO::FETCH_COLUMN);
+            } catch (Exception $e) {
+                $pcols = [];
+            }
+            $payCol = null;
+            if (in_array('booking_id', $pcols)) $payCol = 'booking_id';
+            elseif (in_array('bookingId', $pcols)) $payCol = 'bookingId';
+
+            if ($payCol) {
+                $sql = "SELECT COALESCE(SUM(amount),0) AS total FROM payments WHERE $payCol = ?";
+                $stmt = $this->conn->prepare($sql);
+                $stmt->execute([$bookingId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                return (float)($row['total'] ?? 0);
+            }
+
+            return 0;
         } catch (Exception $e) {
             error_log('getPaymentsTotalByBooking error: ' . $e->getMessage());
             return 0;
@@ -465,10 +525,24 @@ class BookingModel {
      */
     public function getPaidByRegistrant($registrantId) {
         try {
-            $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payment_history WHERE registrant_id = ?");
-            $stmt->execute([$registrantId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($row) return (int)($row['total'] ?? 0);
+            // detect column naming in payment_history
+            try {
+                $colStmt = $this->conn->query("DESCRIBE payment_history");
+                $cols = $colStmt->fetchAll(PDO::FETCH_COLUMN);
+            } catch (Exception $e) {
+                $cols = [];
+            }
+            $col = null;
+            if (in_array('registrant_id', $cols)) $col = 'registrant_id';
+            elseif (in_array('registrantId', $cols)) $col = 'registrantId';
+
+            if ($col) {
+                $sql = "SELECT COALESCE(SUM(amount),0) AS total FROM payment_history WHERE $col = ?";
+                $stmt = $this->conn->prepare($sql);
+                $stmt->execute([$registrantId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                return (float)($row['total'] ?? 0);
+            }
 
             return 0;
         } catch (Exception $e) {

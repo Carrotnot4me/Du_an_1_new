@@ -241,7 +241,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="guideContainer">
           <?php foreach ($guides ?? [] as $g):
             $toursLed = $g['toursLed'] ?? 0;
-            $isBusy = $toursLed > 0;
+            $departuresCount = $g['departures_count'] ?? 0;
+            $isBusy = !empty($g['has_departure']);
             $statusText = $isBusy ? 'Đang dẫn tour' : 'Đang trống lịch';
             $statusClass = $isBusy ? 'badge-busy' : 'badge-available';
             $modalId = 'guideDetailModal' . $g['id'];
@@ -263,9 +264,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
                 <div class="guide-actions">
                   <?php if (!$isBusy): ?>
-                    <a href="?action=schedule-assign&guide_id=<?= $g['id'] ?>" class="btn btn-success btn-sm">
+                    <button class="btn btn-success btn-sm assignBtn" data-guide-id="<?= $g['id'] ?>" data-guide-name="<?= htmlspecialchars($g['name']) ?>">
                       <i class="bi bi-calendar-plus"></i> Phân lịch
-                    </a>
+                    </button>
                   <?php else: ?>
                     <button class="btn btn-secondary btn-sm" disabled>Không thể phân lịch</button>
                   <?php endif; ?>
@@ -283,11 +284,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
   <!-- MODAL CHI TIẾT HDV VỚI AVATAR TRÒN LỚN -->
   <?php foreach ($guides ?? [] as $g):
-    $toursLed = $g['toursLed'] ?? 0;
-    $isBusy = $toursLed > 0;
-    $statusText = $isBusy ? 'Đang dẫn tour' : 'Đang trống lịch';
-    $statusClass = $isBusy ? 'badge-busy' : 'badge-available';
-    $modalId = 'guideDetailModal' . $g['id'];
+  $toursLed = $g['toursLed'] ?? 0;
+  $departuresCount = $g['departures_count'] ?? 0;
+  $isBusy = !empty($g['has_departure']);
+  $statusText = $isBusy ? 'Đang dẫn tour' : 'Đang trống lịch';
+  $statusClass = $isBusy ? 'badge-busy' : 'badge-available';
+  $modalId = 'guideDetailModal' . $g['id'];
 
     // Avatar: ưu tiên trường avatar nếu có, không thì dùng placeholder đẹp
     $avatarUrl = !empty($g['avatar']) ? $g['avatar'] : 'https://media.istockphoto.com/id/1307064735/vector/people-a…12&w=0&k=20&c=A0Ci57tpR4U9nreJjy2PNJDRhkj5tvRv7Mcw9kqOHFA=';
@@ -321,6 +323,48 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
     </div>
   <?php endforeach; ?>
 
+  <!-- Modal Phân lịch: chọn booking chưa có HDV -->
+  <div class="modal fade" id="assignModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form method="POST" action="index.php?action=assign-guide">
+          <div class="modal-header" style="background-color:#0d6efd; color:white;">
+            <h5 class="modal-title">Phân lịch hướng dẫn viên: <span id="assignGuideName"></span></h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="guide_id" id="assignGuideId" value="">
+            <p>Chọn một booking chưa có HDV:</p>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered">
+                <thead class="table-light"><tr><th>Chọn</th><th>ID Booking</th><th>Tên tour</th><th>Departure</th><th>Ngày đi</th></tr></thead>
+                <tbody>
+                  <?php if (!empty($unassignedBookings) && is_array($unassignedBookings)): ?>
+                    <?php foreach ($unassignedBookings as $b): ?>
+                      <tr>
+                        <td class="text-center"><input type="radio" name="booking_id" value="<?= htmlspecialchars($b['id']) ?>"></td>
+                        <td><?= htmlspecialchars($b['id']) ?></td>
+                        <td><?= htmlspecialchars($b['tour_name'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($b['departuresId'] ?? '') ?></td>
+                        <td><?= !empty($b['dateStart']) ? date('d/m/Y', strtotime($b['dateStart'])) : '—' ?></td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php else: ?>
+                    <tr><td colspan="5" class="text-center text-muted">Không có booking nào cần phân lịch.</td></tr>
+                  <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Xác nhận phân lịch</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const allGuides = <?= json_encode($guides ?? [], JSON_UNESCAPED_UNICODE) ?>;
@@ -343,7 +387,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
       container.innerHTML = data.map(g => {
         const toursLed = g.toursLed || 0;
-        const isBusy = toursLed > 0;
+        const isBusy = g.has_departure || (g.departures_count && g.departures_count > 0);
         const statusText = isBusy ? 'Đang dẫn tour' : 'Đang trống lịch';
         const statusClass = isBusy ? 'badge-busy' : 'badge-available';
         const modalId = 'guideDetailModal' + g.id;
@@ -356,7 +400,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
               <div class="guide-info-row"><strong>Số tour đã dẫn:</strong> ${toursLed}</div>
               <div class="guide-info-row"><strong>Trạng thái:</strong> <span class="badge ${statusClass}">${statusText}</span></div>
               <div class="guide-actions">
-                ${!isBusy ? `<a href="?action=schedule-assign&guide_id=${g.id}" class="btn btn-success btn-sm"><i class="bi bi-calendar-plus"></i> Phân lịch</a>` : `<button class="btn btn-secondary btn-sm" disabled>Không thể phân lịch</button>`}
+                ${!isBusy ? `<button class="btn btn-success btn-sm assignBtn" data-guide-id="${g.id}" data-guide-name="${escapeHtml(g.name)}"><i class="bi bi-calendar-plus"></i> Phân lịch</button>` : `<button class="btn btn-secondary btn-sm" disabled>Không thể phân lịch</button>`}
                 <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#${modalId}"><i class="bi bi-eye"></i> Chi tiết</button>
               </div>
             </div>
@@ -390,6 +434,19 @@ const matchStatus = statuses.length === 0 || statuses.includes(status);
       document.getElementById('searchText').value = '';
       renderGuides(allGuides);
     };
+
+    // Assign modal handling
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest && e.target.closest('.assignBtn');
+      if (!btn) return;
+      const gid = btn.dataset.guideId;
+      const gname = btn.dataset.guideName || '';
+      document.getElementById('assignGuideId').value = gid;
+      document.getElementById('assignGuideName').textContent = gname;
+      // show modal
+      const modal = new bootstrap.Modal(document.getElementById('assignModal'));
+      modal.show();
+    });
   </script>
 </body>
 
