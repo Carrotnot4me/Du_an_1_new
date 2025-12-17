@@ -149,6 +149,17 @@ class TourController {
                     $act = isset($acts[$i]) ? $acts[$i] : '';
                     if ($day || $act) $input['schedule'][] = ['day' => $day ?: 1, 'activity' => $act];
                 }
+                // attach details if present
+                $detailsJson = $_POST['schedule_details_json'] ?? '';
+                $detailsPerSchedule = [];
+                if ($detailsJson) {
+                    $decoded = json_decode($detailsJson, true);
+                    if (is_array($decoded)) $detailsPerSchedule = $decoded;
+                }
+                foreach ($input['schedule'] as $idx => &$sch) {
+                    $sch['details'] = $detailsPerSchedule[$idx] ?? [];
+                }
+                unset($sch);
             }
         }
 
@@ -243,6 +254,31 @@ class TourController {
             $act = isset($acts[$i]) ? $acts[$i] : '';
             if ($day || $act) $input['schedule'][] = ['day' => $day ?: 1, 'activity' => $act];
         }
+        // attach details if present
+        $detailsJson = $_POST['schedule_details_json'] ?? '';
+        $detailsPerSchedule = [];
+        if ($detailsJson) {
+            $decoded = json_decode($detailsJson, true);
+            if (is_array($decoded)) $detailsPerSchedule = $decoded;
+        }
+        foreach ($input['schedule'] as $idx => &$sch) {
+            $sch['details'] = $detailsPerSchedule[$idx] ?? [];
+        }
+        unset($sch);
+
+        // schedule details JSON (serialized by JS). It's an array where each index corresponds to schedule index
+        $detailsJson = $_POST['schedule_details_json'] ?? '';
+        $detailsPerSchedule = [];
+        if ($detailsJson) {
+            $decoded = json_decode($detailsJson, true);
+            if (is_array($decoded)) $detailsPerSchedule = $decoded;
+        }
+
+        // attach details to each schedule entry if present
+        foreach ($input['schedule'] as $idx => &$sch) {
+            $sch['details'] = $detailsPerSchedule[$idx] ?? [];
+        }
+        unset($sch);
 
         if (!$input['id']) {
             header('Location: ' . htmlspecialchars($_SERVER['PHP_SELF']) . '?action=tour-list');

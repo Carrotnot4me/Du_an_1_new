@@ -9,92 +9,80 @@ class RevenueReportModel {
         $this->conn = connectDB();
     }
 
-    public function getRevenueReport($year, $month) {
-        $data = [];
-        
-        $params = [':year' => $year];
-        
-        $whereDetail = "WHERE r.year = :year";
-        $whereSummary = "WHERE year = :year"; 
+    // Trong class RevenueReportModel
 
-        if ($month > 0) {
-            $whereDetail .= " AND r.month = :month";
-            $whereSummary .= " AND month = :month";
-            $params[':month'] = $month;
-        }
+public function getRevenueReport($year, $month = 0) {
+    $conn = connectDB();
 
-        try {
-            $query = "SELECT 
-                        r.id, r.month, r.year, r.revenue, r.expense, r.profit,
-                        t.name AS tour_name, t.tour_code
-                      FROM 
-                        revenues r
-                      LEFT JOIN 
-                        tours t ON r.tourId = t.id 
-                      $whereDetail
-                      ORDER BY 
-                        r.year DESC, r.month DESC, r.id DESC";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute($params);
-            $data['details'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Tổng doanh thu thực thu từ payment_history (hoặc bảng payments)
+    $sqlRevenue = "SELECT COALESCE(SUM(amount), 0) as total_revenue 
+                   FROM payment_history 
+                   WHERE YEAR(created_at) = :year";
+    $params = [':year' => $year];
 
-            $querySummary = "SELECT 
-                                SUM(revenue) AS total_revenue, 
-                                SUM(expense) AS total_expense, 
-                                SUM(profit) AS total_profit 
-                             FROM 
-                                revenues 
-                             $whereSummary";
-            
-            $stmtSummary = $this->conn->prepare($querySummary);
-            $stmtSummary->execute($params); 
-            $data['summary'] = $stmtSummary->fetch(PDO::FETCH_ASSOC);
-
-        } catch (PDOException $e) {
-            error_log("RevenueReportModel Error: " . $e->getMessage());
-            $data['error'] = $e->getMessage();
-            $data['details'] = [];
-            $data['summary'] = ['total_revenue' => 0, 'total_expense' => 0, 'total_profit' => 0];
-        }
-
-        return $data;
+    if ($month > 0) {
+        $sqlRevenue .= " AND MONTH(created_at) = :month";
+        $params[':month'] = $month;
     }
 
-    public function getPaymentHistory($year, $month) {
-        $params = [':year' => $year];
-        $where = "WHERE YEAR(p.payment_date) = :year";
+    $stmt = $conn->prepare($sqlRevenue);
+    $stmt->execute($params);
+    $totalRevenue = (float)$stmt->fetchColumn();
 
-        if ($month > 0) {
-            $where .= " AND MONTH(p.payment_date) = :month";
-            $params[':month'] = $month;
-        }
+    // Nếu bạn có bảng chi phí riêng (expenses), thì tính tương tự
+    // Ví dụ:
+    // $totalExpense = ... tính từ bảng expenses
 
-        try {
-            $query = "SELECT 
-                        p.id, p.payment_date, p.amount, p.method, p.status,
-                        b.id AS bookingId, b.total_amount AS total_booking_amount,
-                        t.name AS tour_name
-                      FROM 
-                        payments p
-                      JOIN 
-                        bookings b ON p.bookingId = b.id 
-                      LEFT JOIN 
-                        tours t ON b.tourId = t.id 
-                      $where
-                      ORDER BY 
-                        p.payment_date DESC";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute($params); 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $totalExpense = 0; // tạm thời nếu chưa có
+    $totalProfit = $totalRevenue - $totalExpense;
 
-        } catch (PDOException $e) {
-            error_log("PaymentHistory Error: " . $e->getMessage());
-            return [];
-        }
+    // Trả về summary đúng
+    return [
+        'summary' => [
+            'total_revenue' => $totalRevenue,
+            'total_expense' => $totalExpense,
+            'total_profit'  => $totalProfit
+        ],
+        // có thể thêm chi tiết khác nếu cần
+    ];
+}
+
+public function getPaymentHistory($year, $month = 0) {
+    $conn = connectDB();
+
+    $sql = "SELECT 
+                p.id,
+                p.amount,
+                p.note,
+                p.created_at,
+                -- Nếu bảng payment_history có thêm cột method và status (từ code addPayment)
+                -- thì thêm vào SELECT, nếu không có thì bỏ qua
+                -- p.method,
+                -- p.status,
+                
+                b.id AS bookingId,
+                t.name AS tour_name,
+                c.name AS customer_name  -- Tùy chọn: hiển thị tên khách nếu cần
+            FROM payment_history p
+            LEFT JOIN booking_registrants c ON p.registrant_id = c.id
+            LEFT JOIN bookings b ON c.booking_id = b.id
+            LEFT JOIN tours t ON b.tourId = t.id
+            WHERE YEAR(p.created_at) = :year";
+
+    $params = [':year' => $year];
+
+    if ($month > 0) {
+        $sql .= " AND MONTH(p.created_at) = :month";
+        $params[':month'] = $month;
     }
 
+    $sql .= " ORDER BY p.created_at DESC";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
+}
 
     public function getAvailableYears() {
         try {

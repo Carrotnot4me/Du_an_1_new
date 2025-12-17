@@ -126,9 +126,7 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
             <div style="margin-top:6px">Email: <small><?php echo $user['email'] ?? 'admin@example.com'; ?></small></div>
         </div>
 
-        <a href="index.php?action=logout" class="btn btn-danger mt-3">
-            <i class="bi bi-box-arrow-right"></i> Đăng xuất
-        </a>
+        
     </aside>
 
     <main class="main flex-grow-1 p-4">

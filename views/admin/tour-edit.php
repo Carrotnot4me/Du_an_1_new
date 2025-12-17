@@ -207,9 +207,10 @@
             <button type="button" class="btn btn-sm btn-outline-primary" id="toggleScheduleBtn">Hiển thị / Ẩn lịch trình</button>
           </div>
           <div id="scheduleContainer" style="display:none; margin-top:10px;">
+            <input type="hidden" name="schedule_details_json" id="scheduleDetailsJson" value='<?= htmlspecialchars(json_encode(array_map(function($s){ return $s['details'] ?? []; }, $tour['schedule'] ?? []), JSON_UNESCAPED_UNICODE)) ?>'>
             <?php if (!empty($tour['schedule'])): ?>
-              <?php foreach ($tour['schedule'] as $sch): ?>
-                <div class="schedule-item mb-3 p-3" style="background:#f9f7f0; border-radius:6px;">
+              <?php foreach ($tour['schedule'] as $index => $sch): ?>
+                <div class="schedule-item mb-3 p-3" data-schedule-index="<?= $index ?>" style="background:#f9f7f0; border-radius:6px;">
                   <div class="row mb-2">
                     <div class="col-md-4">
                       <label class="form-label">Tuần thứ</label>
@@ -224,10 +225,28 @@
                       <button type="button" class="btn btn-sm btn-danger w-100 btnRemoveSchedule">🗑️ Xóa</button>
                     </div>
                   </div>
+                  <div class="mb-2">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <strong>Chi tiết lịch trình</strong>
+                      <button type="button" class="btn btn-sm btn-outline-primary btnAddDetail">+ Thêm chi tiết</button>
+                    </div>
+                    <div class="schedule-details mt-2">
+                      <?php if (!empty($sch['details'])): ?>
+                        <?php foreach ($sch['details'] as $det): ?>
+                          <div class="detail-row mb-2" style="display:flex;gap:8px;">
+                            <input type="time" class="form-control form-control-sm detail-start" value="<?= htmlspecialchars($det['start_time'] ?? '') ?>">
+                            <input type="time" class="form-control form-control-sm detail-end" value="<?= htmlspecialchars($det['end_time'] ?? '') ?>">
+                            <input type="text" class="form-control form-control-sm detail-content" placeholder="Nội dung" value="<?= htmlspecialchars($det['content'] ?? '') ?>">
+                            <button type="button" class="btn btn-sm btn-danger btnRemoveDetail">✖</button>
+                          </div>
+                        <?php endforeach; ?>
+                      <?php endif; ?>
+                    </div>
+                  </div>
                 </div>
               <?php endforeach; ?>
             <?php else: ?>
-              <div class="schedule-item mb-3 p-3" style="background:#f9f7f0; border-radius:6px;">
+              <div class="schedule-item mb-3 p-3" data-schedule-index="0" style="background:#f9f7f0; border-radius:6px;">
                 <div class="row mb-2">
                   <div class="col-md-4">
                     <label class="form-label">Tuần thứ</label>
@@ -241,6 +260,13 @@
                     <label class="form-label">Hành động</label>
                     <button type="button" class="btn btn-sm btn-danger w-100 btnRemoveSchedule">🗑️ Xóa</button>
                   </div>
+                </div>
+                <div class="mb-2">
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <strong>Chi tiết lịch trình</strong>
+                    <button type="button" class="btn btn-sm btn-outline-primary btnAddDetail">+ Thêm chi tiết</button>
+                  </div>
+                  <div class="schedule-details mt-2"></div>
                 </div>
               </div>
             <?php endif; ?>
@@ -256,22 +282,19 @@
           <div id="departuresContainer" style="display:none; margin-top:10px;">
             <?php if (!empty($departures)): ?>
               <div class="list-group">
-                <?php foreach ($departures as $d): ?>
-                    <div class="list-group-item d-flex justify-content-between align-items-start">
-                      <div>
-                        <div><strong>Khởi hành:</strong> <?= htmlspecialchars($d['dateStart']) ?> → <?= htmlspecialchars($d['dateEnd']) ?></div>
-                        <div><strong>Điểm tập trung:</strong> <?= htmlspecialchars($d['meetingPoint']) ?></div>
-                        <div><strong>Tài xế / Hướng dẫn:</strong> <?= htmlspecialchars($d['driver']) ?> / <?= htmlspecialchars($d['guideId']) ?></div>
-                      </div>
-                      <div class="ms-3">
-                        <button type="button" class="btn btn-sm btn-outline-primary btnEditDeparture" data-id="<?= htmlspecialchars($d['id']) ?>" data-datestart="<?= htmlspecialchars($d['dateStart']) ?>" data-dateend="<?= htmlspecialchars($d['dateEnd']) ?>" data-meetingpoint="<?= htmlspecialchars($d['meetingPoint']) ?>" data-guideid="<?= htmlspecialchars($d['guideId']) ?>" data-driver="<?= htmlspecialchars($d['driver']) ?>">✏️ Sửa</button>
-                      </div>
+                  <?php foreach ($departures as $dep): ?>
+                    <div class="schedule-item mb-3 p-3" style="background:#f9f7f0; border-radius:6px;">
+                      <strong><?= htmlspecialchars(isset($dep['dateStart']) ? date('d/m/Y', strtotime($dep['dateStart'])) : ($dep['dateStart'] ?? '')) ?><?php if (!empty($dep['dateEnd'])) echo ' → ' . htmlspecialchars(date('d/m/Y', strtotime($dep['dateEnd']))); ?></strong>
+                      <div style="margin-top:6px;">Điểm tập trung: <?= htmlspecialchars($dep['meetingPoint'] ?? $dep['meeting_point'] ?? 'Chưa đặt') ?></div>
+                      <?php if (!empty($dep['driver']) || !empty($dep['guideId'])): ?>
+                        <div style="margin-top:6px; font-size:0.95rem; color:#555">Guide: <?= htmlspecialchars($dep['guideId'] ?? '') ?> — Driver: <?= htmlspecialchars($dep['driver'] ?? $dep['driverId'] ?? '') ?></div>
+                      <?php endif; ?>
                     </div>
-                <?php endforeach; ?>
-              </div>
-            <?php else: ?>
-              <div class="alert alert-secondary">Chưa có đợt khởi hành nào cho tour này.</div>
-            <?php endif; ?>
+                  <?php endforeach; ?>
+                </div>
+              <?php else: ?>
+                <div class="alert alert-secondary">Chưa có đợt khởi hành nào cho tour này.</div>
+              <?php endif; ?>
           </div>
 
           <!-- BUTTONS -->
@@ -341,9 +364,17 @@
               <button type="button" class="btn btn-sm btn-danger w-100 btnRemoveSchedule">🗑️ Xóa</button>
             </div>
           </div>
+          <div class="mb-2">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <strong>Chi tiết lịch trình</strong>
+              <button type="button" class="btn btn-sm btn-outline-primary btnAddDetail">+ Thêm chi tiết</button>
+            </div>
+            <div class="schedule-details mt-2"></div>
+          </div>
         `;
         container.appendChild(node);
         attachRemoveHandler(node.querySelector('.btnRemoveSchedule'));
+        attachDetailHandlers(node);
       });
 
       // Attach remove handler to existing and new buttons
@@ -361,6 +392,63 @@
       document.querySelectorAll('.btnRemoveSchedule').forEach(btn => {
         attachRemoveHandler(btn);
       });
+
+      // Detail handlers: add/remove detail rows inside a schedule-item
+      function attachDetailHandlers(root) {
+        if (!root) return;
+        // add detail button
+        const addBtn = root.querySelector('.btnAddDetail');
+        if (addBtn) {
+          addBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            const detailsContainer = root.querySelector('.schedule-details');
+            if (!detailsContainer) return;
+            const row = document.createElement('div');
+            row.className = 'detail-row mb-2';
+            row.style.display = 'flex'; row.style.gap = '8px';
+            row.innerHTML = `<input type="time" class="form-control form-control-sm detail-start">` +
+                            `<input type="time" class="form-control form-control-sm detail-end">` +
+                            `<input type="text" class="form-control form-control-sm detail-content" placeholder="Nội dung">` +
+                            `<button type="button" class="btn btn-sm btn-danger btnRemoveDetail">✖</button>`;
+            detailsContainer.appendChild(row);
+            attachRemoveDetail(row.querySelector('.btnRemoveDetail'));
+          });
+        }
+        // attach remove handlers for existing detail remove buttons
+        root.querySelectorAll('.btnRemoveDetail').forEach(b => attachRemoveDetail(b));
+      }
+
+      function attachRemoveDetail(btn) {
+        if (!btn) return;
+        btn.addEventListener('click', function(e){
+          e.preventDefault();
+          const row = btn.closest('.detail-row');
+          if (row) row.remove();
+        });
+      }
+
+      // attach detail handlers to existing schedule items
+      document.querySelectorAll('.schedule-item').forEach(item => attachDetailHandlers(item));
+
+      // before submit, serialize details into hidden input
+      const editForm = document.getElementById('editTourForm');
+      if (editForm) {
+        editForm.addEventListener('submit', function(e){
+          const all = [];
+          document.querySelectorAll('.schedule-item').forEach(si => {
+            const dets = [];
+            si.querySelectorAll('.detail-row').forEach(dr => {
+              const start = dr.querySelector('.detail-start') ? dr.querySelector('.detail-start').value : '';
+              const end = dr.querySelector('.detail-end') ? dr.querySelector('.detail-end').value : '';
+              const content = dr.querySelector('.detail-content') ? dr.querySelector('.detail-content').value : '';
+              if (start || end || content) dets.push({start_time: start ? start : null, end_time: end ? end : null, content: content});
+            });
+            all.push(dets);
+          });
+          const hidden = document.getElementById('scheduleDetailsJson');
+          if (hidden) hidden.value = JSON.stringify(all);
+        });
+      }
       
       // Toggle schedule display like filter
       const toggleScheduleBtn = document.getElementById('toggleScheduleBtn');
