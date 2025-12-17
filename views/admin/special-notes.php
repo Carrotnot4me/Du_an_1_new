@@ -132,12 +132,32 @@
     }
     ?>
 
-    <h3 style="margin-bottom:22px;color:#4a3512;">Ghi chú đặc biệt của Khách hàng</h3>
-    <div class="grid">
+    <h3 style="margin-bottom:22px;color:#4a3512;">Danh sách Khách hàng (Ghi chú)</h3>
+    <?php
+      // fetch customers that have non-empty notes and include the tour they belong to (if available)
+      require_once __DIR__ . '/../../commons/function.php';
+      $db = connectDB();
+      $cstmt = $db->prepare("SELECT c.id, c.name, c.note, br.email AS email, t.name AS tour_name FROM customers c LEFT JOIN booking_registrants br ON c.registrants_id = br.id LEFT JOIN bookings b ON br.booking_id = b.id LEFT JOIN tours t ON b.tourId = t.id WHERE c.note IS NOT NULL AND TRIM(c.note) <> '' ORDER BY c.id ASC");
+      $cstmt->execute();
+      $customers = $cstmt->fetchAll(PDO::FETCH_ASSOC);
+      $specialCount = count($customers);
+    ?>
+
+    <div class="grid" style="gap:12px;grid-template-columns:1fr 360px;align-items:center;">
       <div class="card-panel">
-        <h2 style="float:left;">Tổng số ghi chú: <?= count($notes ?? []) ?></h2>
-        <button class="btn btn-success" style="float:right;" data-bs-toggle="modal" data-bs-target="#addNoteModal">+ Thêm ghi chú</button>
-        <div style="clear:both;"></div>
+        <h2 style="margin:0;color:#4a3512">Khách có yêu cầu đặc biệt</h2>
+        <div style="font-size:28px;font-weight:700;margin-top:8px;color:#d35400"><?= $specialCount ?></div>
+      </div>
+
+      <div class="card-panel" style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1">
+          <label class="form-label" for="filterEmail">Lọc theo ghi chú</label>
+          <input id="filterEmail" class="form-control" placeholder="Nhập nội dung ghi chú cần tìm">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;height:100%">
+          <button id="btnFilter" class="btn btn-primary" style="height:40px;">Lọc</button>
+          <button id="btnClearFilter" class="btn btn-outline-secondary" style="height:40px;">Xóa lọc</button>
+        </div>
       </div>
     </div>
 
@@ -146,40 +166,29 @@
         <thead class="table-light">
           <tr>
             <th>STT</th>
-            <th>Khách hàng</th>
-            <th>Email</th>
-            <th>Loại ghi chú</th>
-            <th>Nội dung</th>
-            <th>Hành động</th>
+            <th>Tên khách</th>
+            <th>Ghi chú</th>
+            <th>Xem</th>
           </tr>
         </thead>
         <tbody>
-          <?php if (empty($notes)): ?>
+          <?php if (empty($customers)): ?>
             <tr>
-              <td colspan="6" class="text-center text-muted">Chưa có ghi chú nào</td>
+              <td colspan="4" class="text-center text-muted">Chưa có khách nào</td>
             </tr>
           <?php else: ?>
-            <?php foreach ($notes as $index => $note): ?>
-              <tr>
+            <?php foreach ($customers as $index => $c): ?>
+              <tr data-note="<?= htmlspecialchars(strtolower($c['note'] ?? '')) ?>">
                 <th scope="row"><?= $index + 1 ?></th>
-                <td><?= htmlspecialchars($note->customer_phone ?? 'N/A') ?></td>
-                <td><?= htmlspecialchars($note->customer_email ?? 'N/A') ?></td>
-                <td><span class="badge bg-info"><?= getNoteTypeLabel($note->type ?? '') ?></span></td>
-                <td><?= htmlspecialchars($note->content ?? '') ?></td>
                 <td>
-                  <button class="btn btn-sm btn-primary btn-edit-note" 
-                          data-note-id="<?= htmlspecialchars($note->id, ENT_QUOTES, 'UTF-8') ?>"
-                          data-note-email="<?= htmlspecialchars($note->customer_email ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                          data-note-type="<?= htmlspecialchars($note->type ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                          data-note-content="<?= htmlspecialchars($note->content ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                          title="Chỉnh sửa">
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <button class="btn btn-sm btn-danger btn-delete-note" 
-                          data-note-id="<?= htmlspecialchars($note->id, ENT_QUOTES, 'UTF-8') ?>"
-                          title="Xóa">
-                    <i class="bi bi-trash3"></i>
-                  </button>
+                  <?= htmlspecialchars($c['name'] ?? 'N/A') ?>
+                  <?php if (!empty($c['email'])): ?>
+                    <div class="text-muted small">Email: <?= htmlspecialchars($c['email']) ?></div>
+                  <?php endif; ?>
+                </td>
+                <td class="note-cell"><?= htmlspecialchars($c['note'] ?? '') ?></td>
+                <td>
+                  <i class="bi bi-eye" style="cursor:pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="<?= htmlspecialchars($c['tour_name'] ?? 'Chưa có tour') ?>"></i>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -400,6 +409,83 @@ if (modal) {
     }
   });
 }
+</script>
+<script>
+// Client-side filter for special notes table
+document.addEventListener('DOMContentLoaded', () => {
+  const btnFilter = document.getElementById('btnFilter');
+  const btnClear = document.getElementById('btnClearFilter');
+  const input = document.getElementById('filterEmail');
+  const tbody = document.querySelector('table.table tbody');
+  let noRow = null;
+
+  function showNoResult() {
+    if (!noRow) {
+      noRow = document.createElement('tr');
+      noRow.id = 'noFilterResult';
+      noRow.innerHTML = '<td colspan="4" class="text-center text-muted">Không có kết quả phù hợp</td>';
+      tbody.appendChild(noRow);
+    }
+  }
+
+  function clearNoResult() {
+    if (noRow && noRow.parentNode) {
+      noRow.parentNode.removeChild(noRow);
+      noRow = null;
+    }
+  }
+
+  function filterCustomers() {
+    const q = (input.value || '').trim().toLowerCase();
+    clearNoResult();
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    let visible = 0;
+    rows.forEach(r => {
+      if (r.id === 'noFilterResult') return;
+      const noteAttr = (r.getAttribute('data-note') || '').toLowerCase();
+      const noteCell = r.querySelector('.note-cell');
+      const noteText = (noteCell ? noteCell.textContent : '').toLowerCase();
+      const nameCell = r.querySelector('td');
+      const name = (nameCell ? nameCell.textContent : '').toLowerCase();
+      if (!q || noteAttr.includes(q) || noteText.includes(q) || name.includes(q)) {
+        r.style.display = '';
+        visible++;
+      } else {
+        r.style.display = 'none';
+      }
+    });
+    if (visible === 0) showNoResult();
+  }
+
+  btnFilter?.addEventListener('click', () => filterCustomers());
+  btnClear?.addEventListener('click', () => {
+    if (input) input.value = '';
+    clearNoResult();
+    (Array.from(document.querySelectorAll('table.table tbody tr'))).forEach(r => r.style.display = '');
+  });
+
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      filterCustomers();
+    }
+  });
+});
+</script>
+<script>
+// Initialize Bootstrap tooltips for eye icons so the tour name shows on hover/click
+document.addEventListener('DOMContentLoaded', () => {
+  const eyeEls = Array.from(document.querySelectorAll('.bi-eye'));
+  eyeEls.forEach(el => {
+    try {
+      new bootstrap.Tooltip(el, { placement: 'top', trigger: 'hover focus' });
+    } catch (e) {
+      // ignore if bootstrap not available
+      console.warn('Tooltip init failed', e);
+    }
+  });
+});
 </script>
 </body>
 </html>

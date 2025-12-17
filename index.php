@@ -24,6 +24,7 @@ require_once __DIR__ . '/controllers/GuideSpecialController.php';
 require_once __DIR__ . '/controllers/ScheduleController.php';
 require_once __DIR__ . '/controllers/GuideScheduleController.php';
 require_once __DIR__ . '/controllers/SupplierController.php';
+require_once __DIR__ . '/controllers/CustomerController.php';
 
 $authController          = new AuthController();
 
@@ -43,6 +44,7 @@ $guideSpecialController  = new GuideSpecialController();
 $scheduleController      = new ScheduleController();
 $guideScheduleController = new GuideScheduleController();
 $supplierController      = new SupplierController();
+$customerController      = new CustomerController();
 
 function authGuard()
 {
@@ -214,6 +216,14 @@ switch ($action) {
         authGuard();
         $supplierController->getServiceTypes();
         break;
+
+    // Ensure NoteController is available
+    if (!isset($noteController) || $noteController === null) {
+        if (!class_exists('NoteController')) {
+            require_once __DIR__ . '/controllers/NoteController.php';
+        }
+        $noteController = new NoteController();
+    }
 
     // Notes
     case 'special-notes':

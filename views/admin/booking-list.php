@@ -92,32 +92,11 @@
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
-        <button class="btn btn-sm btn-outline-secondary d-md-none" id="btnToggle"><i class="bi bi-list"></i></button>
-        <div class="me-2">VI</div>
-        <div class="btn btn-light btn-sm"><i class="bi bi-bell"></i></div>
-        <div class="dropdown" style="position:relative;">
-          <?php
-          $avatar = $_SESSION['user_avatar'] ?? '';
-          if (empty($avatar)) {
-            $avatar = 'https://ui-avatars.com/api/?name=User&background=random';
-          }
-          ?>
-          <img src="<?= htmlspecialchars($avatar) ?>"
-            alt="Avatar"
-            id="avatarBtn"
-            style="width:50px;height:50px;border-radius:50%;cursor:pointer;object-fit:cover;border:2px solid #f5c542;"
-            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=User&background=random'"
-            data-bs-toggle="dropdown"
-            aria-expanded="false">
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="avatarBtn" style="min-width:150px;">
-            <li><a class="dropdown-item" href="?action=profile">📋 Hồ sơ</a></li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-            <li><a class="dropdown-item text-danger" href="?action=logout">🚪 Đăng xuất</a></li>
-          </ul>
-        </div>
-      </div>
+      <button class="btn btn-sm btn-outline-secondary d-md-none" id="btnToggle"><i class="bi bi-list"></i></button>
+      <div class="me-2">VI</div>
+      <div class="btn btn-light btn-sm"><i class="bi bi-bell"></i></div>
+      <div class="rounded-circle bg-warning text-dark d-flex align-items:center;justify-content:center" style="width:50px;height:50px;font-weight:600">A</div>
+    </div>
 
     <h3 style="margin-bottom:22px;color:#4a3512;">Quản lý Booking & Trạng thái</h3>
     <div class="grid">

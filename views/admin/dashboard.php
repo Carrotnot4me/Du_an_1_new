@@ -6,13 +6,92 @@ function formatCurrency($amount) {
 
 $dashboardData = $dashboardData ?? [];
 
-$last12MonthsLabels = $dashboardData['last_12_months_labels'] ?? array_fill(0, 12, 'T');
-$last12MonthsRevenue = $dashboardData['last_12_months_revenue'] ?? array_fill(0, 12, 0);
-$last12MonthsExpenses = $dashboardData['last_12_months_expenses'] ?? array_fill(0, 12, 0);
+// Compute revenue/expense/profit from `payment_history` if available
+require_once __DIR__ . '/../../commons/function.php';
+$db = connectDB();
 
-$totalRevenueAcc = $dashboardData['total_revenue_acc'] ?? 0;
-$totalExpenseAcc = $dashboardData['total_expense_acc'] ?? 0;
-$totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
+$last12MonthsLabels = [];
+$last12MonthsRevenue = [];
+$last12MonthsExpenses = [];
+
+$totalRevenueAcc = 0;
+$totalExpenseAcc = 0;
+$totalProfitAcc = 0;
+
+try {
+    // total revenue (sum of all amounts)
+    $stmt = $db->query("SELECT COALESCE(SUM(amount),0) AS total FROM payment_history");
+    $row = $stmt->fetch();
+    $totalRevenueAcc = (int)($row['total'] ?? 0);
+
+    // expenses = 70% of revenue, profit = 30%
+    $totalExpenseAcc = (int)round($totalRevenueAcc * 0.7);
+    $totalProfitAcc = $totalRevenueAcc - $totalExpenseAcc;
+
+    // prepare last 12 months labels and sums
+    $now = new DateTime();
+    // build months from 11 months ago to this month
+    $months = [];
+    for ($i = 11; $i >= 0; $i--) {
+        $d = (clone $now)->modify("-{$i} months");
+        $months[] = $d;
+        $last12MonthsLabels[] = 'Tháng ' . $d->format('m');
+    }
+
+    // fetch sums grouped by year/month in one query
+    $start = $months[0]->format('Y-m-01 00:00:00');
+    $end = $months[count($months)-1]->format('Y-m-t 23:59:59');
+    $gstmt = $db->prepare("SELECT YEAR(created_at) AS y, MONTH(created_at) AS m, COALESCE(SUM(amount),0) AS s FROM payment_history WHERE created_at BETWEEN :start AND :end GROUP BY y, m");
+    $gstmt->execute([':start' => $start, ':end' => $end]);
+    $groups = $gstmt->fetchAll(PDO::FETCH_ASSOC);
+    $map = [];
+    foreach ($groups as $g) {
+        $key = sprintf('%04d-%02d', $g['y'], $g['m']);
+        $map[$key] = (int)$g['s'];
+    }
+
+    foreach ($months as $m) {
+        $k = $m->format('Y-m');
+        $rev = $map[$k] ?? 0;
+        $last12MonthsRevenue[] = $rev;
+        $last12MonthsExpenses[] = (int)round($rev * 0.7);
+    }
+} catch (Exception $e) {
+    // fallback to provided data or zeros
+    $last12MonthsLabels = $dashboardData['last_12_months_labels'] ?? array_fill(0, 12, 'T');
+    $last12MonthsRevenue = $dashboardData['last_12_months_revenue'] ?? array_fill(0, 12, 0);
+    $last12MonthsExpenses = $dashboardData['last_12_months_expenses'] ?? array_fill(0, 12, 0);
+    $totalRevenueAcc = $dashboardData['total_revenue_acc'] ?? 0;
+    $totalExpenseAcc = $dashboardData['total_expense_acc'] ?? 0;
+    $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
+}
+
+// Fetch totals and lists for tours, bookings, guides and departures
+try {
+    // total tours
+    $tstmt = $db->query("SELECT COUNT(*) AS cnt FROM tours");
+    $trow = $tstmt->fetch();
+    $totalTours = (int)($trow['cnt'] ?? 0);
+
+    // total bookings
+    $bstmt = $db->query("SELECT COUNT(*) AS cnt FROM bookings");
+    $brow = $bstmt->fetch();
+    $totalBookings = (int)($brow['cnt'] ?? 0);
+
+    // recent guides: pick staff rows (limit 10)
+    $gstmt = $db->query("SELECT id, name, experience, COALESCE(toursLed,0) AS toursLed FROM staffs ORDER BY toursLed DESC, name ASC LIMIT 10");
+    $recent_guides = $gstmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // upcoming departures: join departures -> tours and guide name
+    $dstmt = $db->prepare("SELECT d.id, d.tourId, d.dateStart, d.dateEnd, d.meetingPoint, t.name AS tour_name, s.name AS guide FROM departures d LEFT JOIN tours t ON d.tourId = t.id LEFT JOIN staffs s ON d.guideId = s.id WHERE d.dateStart >= CURDATE() ORDER BY d.dateStart ASC LIMIT 10");
+    $dstmt->execute();
+    $upcoming_departures = $dstmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $totalTours = $dashboardData['total_tours'] ?? 0;
+    $totalBookings = $dashboardData['total_bookings'] ?? 0;
+    $recent_guides = $dashboardData['recent_guides'] ?? [];
+    $upcoming_departures = $dashboardData['upcoming_departures'] ?? [];
+}
 
 ?>
 <!DOCTYPE html>
@@ -135,13 +214,13 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
         <div class="row g-4">
             <div class="col-md-3">
                 <div class="p-4 bg-white rounded shadow-sm text-center">
-                    <h4 class="text-dark" id="totalTours"><?php echo $dashboardData['total_tours'] ?? 0; ?></h4>
+                    <h4 class="text-dark" id="totalTours"><?php echo $totalTours ?? ($dashboardData['total_tours'] ?? 0); ?></h4>
                     <div>Tổng số Tour</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="p-4 bg-white rounded shadow-sm text-center">
-                    <h4 class="text-dark" id="totalBookings"><?php echo $dashboardData['total_bookings'] ?? 0; ?></h4>
+                    <h4 class="text-dark" id="totalBookings"><?php echo $totalBookings ?? ($dashboardData['total_bookings'] ?? 0); ?></h4>
                     <div>Tổng số Booking</div>
                 </div>
             </div>
@@ -183,8 +262,8 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
                 </thead>
                 <div class="table-scroll-body">
                     <tbody id="guideListBody">
-                        <?php if (!empty($dashboardData['recent_guides'])): ?>
-                            <?php foreach ($dashboardData['recent_guides'] as $index => $guide): ?>
+                        <?php if (!empty($recent_guides)): ?>
+                            <?php foreach ($recent_guides as $index => $guide): ?>
                                 <tr>
                                     <td><?php echo $index + 1; ?></td>
                                     <td><?php echo $guide['name']; ?></td>
@@ -214,8 +293,8 @@ $totalProfitAcc = $dashboardData['total_profit_acc'] ?? 0;
                 </thead>
                 <div class="table-scroll-body">
                     <tbody id="upcomingDeparturesBody">
-                        <?php if (!empty($dashboardData['upcoming_departures'])): ?>
-                            <?php foreach ($dashboardData['upcoming_departures'] as $index => $departure): ?>
+                        <?php if (!empty($upcoming_departures)): ?>
+                            <?php foreach ($upcoming_departures as $index => $departure): ?>
                                 <tr>
                                     <td><?php echo $index + 1; ?></td>
                                     <td><?php echo $departure['tour_name']; ?></td>

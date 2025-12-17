@@ -1,155 +1,178 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Thông tin hành khách</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ghi chú đặc biệt</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
   <style>
-    body {
-      background: #f5f6f8;
+    body { background:#f4f6f9 }
+    .app { display:flex; min-height:100vh }
+    .sidebar {
+      width:260px; background:#1f2937; color:#fff;
+      padding:16px; display:flex; flex-direction:column
     }
-    .representative {
-      background: #fff;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 20px;
-      border: 1px solid #e0e0e0;
-      position: relative;
+    .nav-item {
+      color:#cbd5e1; padding:10px; border-radius:6px;
+      display:block; text-decoration:none
     }
-    .rep-remove {
-      position: absolute;
-      top: 12px;
-      right: 12px;
+    .nav-item:hover, .nav-item.active {
+      background:#374151; color:#fff
     }
-    .customer-item {
-      background: #fafafa;
-      border: 1px dashed #ccc;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 10px;
+    .main { flex:1; padding:24px }
+    .topbar {
+      display:flex; justify-content:flex-end; align-items:center;
+      gap:12px; margin-bottom:20px
+    }
+    .card-panel {
+      background:#fff; border-radius:10px; padding:16px;
+      box-shadow:0 4px 12px rgba(0,0,0,.05)
     }
   </style>
 </head>
+
 <body>
+<div class="app">
 
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Thông tin hành khách</h4>
-    <button class="btn btn-success" id="btnAddRepresentative">+ Khách hàng</button>
-  </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="mb-4 d-flex align-items-center gap-2">
+      <div style="width:40px;height:40px;background:#f5c542;border-radius:8px;
+                  display:flex;align-items:center;justify-content:center;color:#000;font-weight:700">
+        AD
+      </div>
+      <div>
+        <strong>AdminPanel</strong><br>
+        <small>v1.0</small>
+      </div>
+    </div>
 
-  <div id="representativeList"></div>
+    <nav class="flex-grow-1">
+      <a class="nav-item active" href="#"><i class="bi bi-house"></i> Trang quản trị</a>
+      <a class="nav-item" href="#"><i class="bi bi-airplane"></i> Tour</a>
+      <a class="nav-item" href="#"><i class="bi bi-people"></i> Khách hàng</a>
+      <a class="nav-item" href="#"><i class="bi bi-sticky"></i> Ghi chú</a>
+    </nav>
+
+    <div style="font-size:13px">
+      <div>Người dùng: <strong>Admin</strong></div>
+      <div>Email: admin@example.com</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <span>VI</span>
+      <i class="bi bi-bell"></i>
+      <img src="https://ui-avatars.com/api/?name=Admin"
+           style="width:42px;height:42px;border-radius:50%">
+    </div>
+
+    <h3 class="mb-3">Ghi chú đặc biệt của Khách hàng</h3>
+
+    <div class="card-panel mb-3 d-flex justify-content-between">
+      <strong>Tổng số ghi chú: 2</strong>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#noteModal">
+        + Thêm ghi chú
+      </button>
+    </div>
+
+    <div class="card-panel">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Khách hàng</th>
+          <th>Email</th>
+          <th>Loại</th>
+          <th>Nội dung</th>
+          <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>1</td>
+          <td>0123456789</td>
+          <td>khach1@gmail.com</td>
+          <td><span class="badge bg-info">Ăn chay</span></td>
+          <td>Khách ăn chay trường</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="editNote()">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteNote()">🗑️</button>
+          </td>
+        </tr>
+
+        <tr>
+          <td>2</td>
+          <td>0987654321</td>
+          <td>khach2@gmail.com</td>
+          <td><span class="badge bg-warning">Dị ứng</span></td>
+          <td>Dị ứng hải sản</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="editNote()">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteNote()">🗑️</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
 </div>
 
-<script>
-let repIndex = 0;
-const pricePerPerson = 1000000;
-
-// Thêm người đại diện
-document.getElementById('btnAddRepresentative').addEventListener('click', () => {
-  addRepresentative();
-});
-
-function addRepresentative() {
-  const index = repIndex++;
-
-  const html = `
-    <div class="representative" data-index="${index}">
-      <button type="button"
-        class="btn btn-sm btn-danger rep-remove"
-        onclick="removeRepresentative(${index})">✕</button>
-
-      <h6 class="fw-bold mb-3">Người đại diện #${index + 1}</h6>
-
-      <div class="row g-3 mb-3">
-        <div class="col-md-3">
-          <input class="form-control" placeholder="Họ và tên">
-        </div>
-        <div class="col-md-3">
-          <input class="form-control" placeholder="Email">
-        </div>
-        <div class="col-md-2">
-          <input class="form-control" placeholder="Số điện thoại">
-        </div>
-        <div class="col-md-2">
-          <input class="form-control quantity" value="0" readonly>
-        </div>
-        <div class="col-md-2">
-          <input class="form-control total" value="0 đ" readonly>
-        </div>
+<!-- MODAL -->
+<div class="modal fade" id="noteModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ghi chú</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
-      <button class="btn btn-primary btn-sm mb-3"
-        onclick="addCustomer(${index})">
-        + Thêm hành khách
-      </button>
-
-      <div class="customer-list"></div>
-    </div>
-  `;
-
-  document.getElementById('representativeList')
-    .insertAdjacentHTML('beforeend', html);
-}
-
-// Xoá người đại diện
-function removeRepresentative(index) {
-  const rep = document.querySelector(`.representative[data-index="${index}"]`);
-  if (rep) rep.remove();
-}
-
-// Thêm hành khách
-function addCustomer(index) {
-  const rep = document.querySelector(`.representative[data-index="${index}"]`);
-  const list = rep.querySelector('.customer-list');
-  const qty = rep.querySelector('.quantity');
-  const total = rep.querySelector('.total');
-
-  const newQty = parseInt(qty.value) + 1;
-  qty.value = newQty;
-  total.value = (newQty * pricePerPerson).toLocaleString('vi-VN') + ' đ';
-
-  const html = `
-    <div class="customer-item">
-      <div class="row g-3 align-items-center">
-        <div class="col-md-4">
-          <input class="form-control" placeholder="Họ và tên hành khách">
+      <div class="modal-body">
+        <div class="mb-2">
+          <label>Email</label>
+          <input class="form-control" placeholder="email khách hàng">
         </div>
-        <div class="col-md-3">
+
+        <div class="mb-2">
+          <label>Loại</label>
           <select class="form-select">
-            <option value="">Giới tính</option>
-            <option>Nam</option>
-            <option>Nữ</option>
+            <option>Ăn chay</option>
+            <option>Dị ứng</option>
+            <option>Sức khỏe</option>
+            <option>Khác</option>
           </select>
         </div>
-        <div class="col-md-3">
-          <input type="date" class="form-control">
-        </div>
-        <div class="col-md-2 text-end">
-          <button type="button"
-            class="btn btn-outline-danger btn-sm"
-            onclick="removeCustomer(this, ${index})">Xoá</button>
+
+        <div class="mb-2">
+          <label>Nội dung</label>
+          <textarea class="form-control" rows="3"></textarea>
         </div>
       </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button class="btn btn-primary">Lưu</button>
+      </div>
     </div>
-  `;
+  </div>
+</div>
 
-  list.insertAdjacentHTML('beforeend', html);
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function editNote() {
+  alert("Demo chỉnh sửa (HTML thuần)");
 }
-
-// Xoá hành khách
-function removeCustomer(btn, index) {
-  const rep = document.querySelector(`.representative[data-index="${index}"]`);
-  const qty = rep.querySelector('.quantity');
-  const total = rep.querySelector('.total');
-
-  const newQty = Math.max(0, parseInt(qty.value) - 1);
-  qty.value = newQty;
-  total.value = (newQty * pricePerPerson).toLocaleString('vi-VN') + ' đ';
-
-  btn.closest('.customer-item').remove();
+function deleteNote() {
+  if (confirm("Xóa ghi chú này?")) {
+    alert("Demo xóa (HTML thuần)");
+  }
 }
 </script>
-
 </body>
 </html>
