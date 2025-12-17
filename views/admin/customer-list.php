@@ -7,19 +7,21 @@ if (!empty($_GET['ajax_customers'])) {
   $tourId = $_GET['tour_id'] ?? null;
   try {
     if ($departureId) {
-      $sql = "SELECT c.* , br.booking_id, br.id AS registrant_id
+      $sql = "SELECT c.* , br.booking_id, br.id AS registrant_id, ch.id AS checkin_id, ch.checkin_time
           FROM customers c
           JOIN booking_registrants br ON c.registrants_id = br.id
           JOIN bookings b ON br.booking_id = b.id
+          LEFT JOIN checkins ch ON ch.customer_id = c.id
           WHERE b.departuresId = :dep
           ORDER BY c.id ASC";
       $stmt = $db->prepare($sql);
       $stmt->execute([':dep' => $departureId]);
     } elseif ($tourId) {
-      $sql = "SELECT c.* , br.booking_id, br.id AS registrant_id
+      $sql = "SELECT c.* , br.booking_id, br.id AS registrant_id, ch.id AS checkin_id, ch.checkin_time
           FROM customers c
           JOIN booking_registrants br ON c.registrants_id = br.id
           JOIN bookings b ON br.booking_id = b.id
+          LEFT JOIN checkins ch ON ch.customer_id = c.id
           WHERE b.tourId = :tour
           ORDER BY c.id ASC";
       $stmt = $db->prepare($sql);

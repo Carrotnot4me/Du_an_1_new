@@ -23,6 +23,23 @@ class CheckinController {
                 header('Location: index.php?action=checkin&message=' . urlencode($result));
                 exit;
 
+            case 'check_customer':
+                // AJAX/POST: check a single customer by id
+                $customerId = $_POST['customer_id'] ?? null;
+                if (!$customerId) {
+                    header('Content-Type: application/json'); echo json_encode(['success'=>false,'error'=>'missing customer_id']); exit;
+                }
+                $ok = checkCustomer($customerId);
+                header('Content-Type: application/json'); echo json_encode(['success'=>(bool)$ok]); exit;
+
+            case 'undo_check_customer':
+                $customerId = $_POST['customer_id'] ?? null;
+                if (!$customerId) {
+                    header('Content-Type: application/json'); echo json_encode(['success'=>false,'error'=>'missing customer_id']); exit;
+                }
+                $ok = undoCheckCustomer($customerId);
+                header('Content-Type: application/json'); echo json_encode(['success'=>(bool)$ok]); exit;
+
             case 'undo_checkin':
                 $bookingId = $_GET['booking_id'] ?? '';
                 if (undoCheckin($bookingId)) {

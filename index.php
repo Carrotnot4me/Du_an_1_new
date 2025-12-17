@@ -342,6 +342,10 @@ switch ($action) {
         authGuard();
         $guideController->index();
         break;
+    case 'assign-guide':
+        authGuard();
+        $guideController->assign();
+        break;
 
     // Schedule
     case 'schedule-assign':
