@@ -18,7 +18,7 @@ class GuideScheduleController {
         // Lấy lịch làm việc
         $schedules = $this->model->getSchedules($guideId);
 
-        // Gọi view
-        include './views/guide/guide-schedule.php';
+        // Gọi view (moved to admin folder)
+        require_once __DIR__ . '/../views/admin/guide-schedule.php';
     }
 }

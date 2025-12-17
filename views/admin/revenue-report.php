@@ -37,59 +37,66 @@ $sidebarContent = '
 
         <nav>
 
-            <a class="nav-item" href="index.php?action=dashboard">
-                <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
-            </a>
+        <!-- TRANG CHÍNH -->
+        <a class="nav-item active" href="index.php?action=dashboard">
+          <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
+        </a>
 
-            <div class="nav-group">QUẢN LÝ TOUR</div>
+        <!-- QUẢN LÝ TOUR -->
 
-            <a class="nav-item" href="index.php?action=tour-list">
-                <i class="bi bi-airplane me-2"></i> Danh sách Tour
-            </a>
+        <a class="nav-item" href="index.php?action=tour-list">
+          <i class="bi bi-airplane me-2"></i> Danh sách Tour
+        </a>
+        <a class="nav-item" href="index.php?action=customer-list"><i class="bi bi-people me-2"></i> Quản lý Khách hàng</a>
 
-            <a class="nav-item" href="index.php?action=guide-logs">
-                <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
-            </a>
+        <a class="nav-item" href="index.php?action=supplier-list">
+          <i class="bi bi-building me-2"></i> Quản lý Nhà Cung Cấp
+        </a>
 
-            <a class="nav-item" href="index.php?action=booking-list">
-                <i class="bi bi-calendar-check me-2"></i> Booking
-            </a>
+        <a class="nav-item" href="index.php?action=guide-logs">
+          <i class="bi bi-journal-text me-2"></i> Nhật ký Tour
+        </a>
 
-            <a class="nav-item" href="index.php?action=checkin">
-                <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
-            </a>
+        <a class="nav-item" href="index.php?action=booking-list">
+          <i class="bi bi-calendar-check me-2"></i> Booking
+        </a>
 
-            <div class="nav-group">HƯỚNG DẪN VIÊN</div>
+        <a class="nav-item" href="index.php?action=checkin">
+          <i class="bi bi-clipboard-check me-2"></i> Quy trình Check-in
+        </a>
 
-            <a class="nav-item" href="index.php?action=guides">
-                <i class="bi bi-person-badge-fill me-2"></i> Danh sách HDV
-            </a>
 
-            <a class="nav-item" href="index.php?action=schedule-assign">
-                <i class="bi bi-calendar-event me-2"></i> Phân công lịch
-            </a>
+        <!-- HƯỚNG DẪN VIÊN -->
 
-            <a class="nav-item" href="index.php?action=guide-schedule">
-                <i class="bi bi-list-check me-2"></i> Lịch HDV
-            </a>
+        <a class="nav-item" href="index.php?action=guides">
+          <i class="bi bi-person-badge-fill me-2"></i> Danh sách HDV
+        </a>
 
-            <div class="nav-group">BÁO CÁO</div>
+        <a class="nav-item" href="index.php?action=schedule-assign">
+          <i class="bi bi-calendar-event me-2"></i> Phân công lịch
+        </a>
 
-            <a class="nav-item active" href="index.php?action=revenue-report">
-                <i class="bi bi-currency-dollar me-2"></i> Doanh thu
-            </a>
+        <a class="nav-item" href="index.php?action=guide-schedule">
+          <i class="bi bi-list-check me-2"></i> Lịch HDV
+        </a>
 
-            <div class="nav-group">KHÁC</div>
+        <!-- BÁO CÁO -->
 
-            <a class="nav-item" href="index.php?action=guide-special">
-                <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
-            </a>
+        <a class="nav-item" href="index.php?action=revenue-report">
+          <i class="bi bi-currency-dollar me-2"></i> Doanh thu
+        </a>
 
-            <a class="nav-item" href="index.php?action=special-notes">
-                <i class="bi bi-sticky me-2"></i> Ghi chú
-            </a>
+        <!-- KHÁC -->
 
-        </nav>
+        <a class="nav-item" href="index.php?action=guide-special">
+          <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
+        </a>
+
+        <a class="nav-item" href="index.php?action=special-notes">
+          <i class="bi bi-sticky me-2"></i> Ghi chú
+        </a>
+
+      </nav>
 
         
     </aside>
