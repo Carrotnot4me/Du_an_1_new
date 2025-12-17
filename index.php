@@ -354,10 +354,7 @@ switch ($action) {
         break;
 
     // Payments
-    case 'add-payment-form':
-        authGuard();
-        $paymentController->addPaymentForm();
-        break;
+    
     case 'process-payment':
         authGuard();
         $paymentController->processPayment();

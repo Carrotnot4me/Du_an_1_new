@@ -189,13 +189,22 @@
       </div>
       <div class="col-lg-6">
         <?php
+          require_once __DIR__ . '/../../models/BookingModel.php';
+          $bm = new BookingModel();
           $booking = $booking ?? null;
           $registrants = $registrants ?? [];
           $tourName = $booking['tour_name'] ?? ($booking['name'] ?? 'Tour Sa Pa – Fansipan 2N1Đ');
           $adultPrice = isset($booking['adult_price']) ? (int)$booking['adult_price'] : 2890000;
           $tourCode = $booking['tour_code'] ?? 'SP-FANS-21';
+          // total paid for this booking (from payment_history when available)
+          $paid = 0;
+          if (!empty($booking['id'])) {
+              $paid = $bm->getPaymentsTotalByBooking($booking['id']);
+          }
         ?>
-        <h2 class="fw-bold"><?= htmlspecialchars($tourName) ?></h2>
+        <h2 class="fw-bold d-flex align-items-center"><?= htmlspecialchars($tourName) ?>
+          <a href="index.php?action=booking-list" class="btn btn-outline-secondary btn-sm ms-3">← Danh sách đặt chỗ</a>
+        </h2>
         <p class="text-muted fs-5">Du lịch nghỉ dưỡng – khám phá núi rừng</p>
         <div class="fs-4 fw-bold text-danger mb-2"><?= number_format($adultPrice,0,',','.') ?>đ / người</div>
         <div class="text-muted">Mã tour: <strong><?= htmlspecialchars($tourCode) ?></strong></div>
@@ -246,11 +255,10 @@
         <?php if (!empty($tourSchedules) && is_array($tourSchedules)): ?>
           <?php $week = 1; foreach ($tourSchedules as $s): ?>
             <div class="mb-3">
-              <div class="schedule-day">Tuần <?= $week ?></div>
-              <ul>
+              <div class="schedule-day">Ngày <?= $week ?></div>
+              <ul style="padding-left:18px; margin:6px 0; list-style:none;">
                 <?php if (!empty($s['activity'])): ?>
                   <?php
-                    // If activity contains new lines, split them into list items
                     $act = trim($s['activity']);
                     $lines = preg_split('/\r?\n/', $act);
                     foreach ($lines as $line):
@@ -258,27 +266,27 @@
                   ?>
                     <li><?= htmlspecialchars($line) ?></li>
                   <?php endforeach; ?>
-                <?php else: ?>
-                  <?php if (!empty($s['title'])): ?>
-                    <li><?= htmlspecialchars($s['title']) ?></li>
-                  <?php endif; ?>
-                  <?php if (!empty($s['description'])): ?>
-                    <li><?= htmlspecialchars($s['description']) ?></li>
-                  <?php endif; ?>
                 <?php endif; ?>
+
+                <?php if (!empty($s['details']) && is_array($s['details'])): ?>
+                  <?php foreach ($s['details'] as $d): ?>
+                    <li style="margin-top:6px; font-size:0.95rem;"><strong><?= htmlspecialchars(substr($d['start_time'] ?? '',0,5)) ?><?php if (!empty($d['end_time'])) echo ' - ' . htmlspecialchars(substr($d['end_time'],0,5)); ?></strong> — <?= htmlspecialchars($d['content'] ?? '') ?></li>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+
               </ul>
             </div>
           <?php $week++; endforeach; ?>
         <?php else: ?>
           <div class="mb-3">
-            <div class="schedule-day">Tuần 1</div>
+            <div class="schedule-day">Ngày 1</div>
             <ul>
               <li>Khởi hành – tham quan Cát Cát</li>
               <li>Nhận phòng – nghỉ ngơi</li>
             </ul>
           </div>
           <div>
-            <div class="schedule-day">Tuần 2</div>
+            <div class="schedule-day">Ngày 2</div>
             <ul>
               <li>Fansipan – về Hà Nội</li>
             </ul>
@@ -324,6 +332,11 @@
                     $qty = (int)($r['quantity'] ?? 1);
                     $total = $qty * ($adultPrice ?? 0);
                 }
+                // determine paid amount per registrant from payment_history
+                $paidFor = 0;
+                if (!empty($r['id'])) {
+                    $paidFor = $bm->getPaidByRegistrant($r['id']);
+                }
                 $statusLabel = $r['status'] ?? 'Chờ xác nhận';
                 if (stripos($statusLabel, 'hoàn') !== false) {
                   $statusClass = 'status-complete';
@@ -338,7 +351,7 @@
                 <td><?= htmlspecialchars($r['email'] ?? '') ?></td>
                 <td><?= htmlspecialchars($r['phone'] ?? '') ?></td>
                 <td><?= $qty ?></td>
-                      <?php $paidFor = (int)($r['paid'] ?? 0); $remaining = max(0, $total - $paidFor); ?>
+                      <?php $remaining = max(0, $total - $paidFor); ?>
                       <td class="text-danger fw-bold"><?= $remaining ? number_format($remaining,0,',','.') . 'đ' : '0đ' ?></td>
                 <td><span class="<?= $statusClass ?>"><?= htmlspecialchars($statusLabel) ?></span></td>
               </tr>
@@ -406,7 +419,7 @@
               }
           }
           $extraFee = round($totalTour * 0.1);
-          $paid = isset($paymentsTotal) ? (int)$paymentsTotal : 0;
+          // $paid already computed above from payment_history via BookingModel
           $remaining = $totalTour - $paid;
         ?>
         <div class="payment-card g-red d-flex align-items-center justify-content-between p-4 rounded-4 mb-3">
@@ -492,7 +505,10 @@
                                 $qty = (int)($r['quantity'] ?? 1);
                                 $total = $qty * ($adultPrice ?? 0);
                             }
-                            $paidFor = (int)($r['paid'] ?? 0);
+                            $paidFor = 0;
+                            if (!empty($r['id'])) {
+                              $paidFor = $bm->getPaidByRegistrant($r['id']);
+                            }
                           ?>
                           <option value="<?= htmlspecialchars($r['id'] ?? '') ?>" data-email="<?= htmlspecialchars($r['email'] ?? '') ?>" data-phone="<?= htmlspecialchars($r['phone'] ?? '') ?>" data-total="<?= $total ?>" data-paid="<?= $paidFor ?>">
                             <?= htmlspecialchars($r['name'] ?? '') ?>
@@ -602,6 +618,107 @@ document.getElementById('customerSelect').addEventListener('change', function ()
     if (amtInput) amtInput.value = (remainingDeposit > 0 ? remainingDeposit : remainingTotal) || '';
   });
 </script>
+<script>
+  // Representative -> customers modal logic: run after DOM ready so elements exist
+  document.addEventListener('DOMContentLoaded', function () {
+    const ADULT_PRICE = <?= (int)$adultPrice ?>;
+    const CHILD_PRICE = <?= (int)($booking['child_price'] ?? 0) ?>;
+    const custList = document.getElementById('custList');
+    const repPreview = document.getElementById('repPreviewTotal');
+    const hiddenCustomers = document.getElementById('hiddenCustomersJson');
+    const form = document.getElementById('addRegistrantForm');
+
+    if (!custList || !repPreview || !hiddenCustomers || !form) return;
+
+    let lastAdults = 0, lastChilds = 0;
+
+    function createRow() {
+      const el = document.createElement('div');
+      el.className = 'customer-item mb-2 p-2 border rounded-2';
+      el.innerHTML = `
+        <div class="row g-2 align-items-center">
+          <div class="col-md-4"><input class="form-control cust-name" placeholder="Họ và tên"></div>
+          <div class="col-md-3"><select class="form-select cust-gender"><option value="">Giới tính</option><option>Nam</option><option>Nữ</option></select></div>
+          <div class="col-md-3"><input type="date" class="form-control cust-dob"></div>
+          <div class="col-md-2 text-end"><button type="button" class="btn btn-outline-danger btn-sm cust-remove">Xóa</button></div>
+        </div>
+        <div class="row g-2 mt-2">
+          <div class="col-12"><input class="form-control form-control-sm cust-note" placeholder="Ghi chú (tùy chọn)"></div>
+        </div>
+      `;
+      custList.appendChild(el);
+      const removeBtn = el.querySelector('.cust-remove');
+      removeBtn.addEventListener('click', () => { el.remove(); computeTotals(); });
+      el.querySelector('.cust-dob').addEventListener('change', computeTotals);
+      el.querySelector('.cust-name').addEventListener('input', computeTotals);
+      // focus the name input for better UX
+      const nameInput = el.querySelector('.cust-name'); if (nameInput) nameInput.focus();
+      return el;
+    }
+
+    function computeTotals() {
+      const rows = Array.from(custList.querySelectorAll('.customer-item'));
+      let adults = 0, childs = 0, base = 0;
+      const now = new Date(); const currentYear = now.getFullYear();
+      rows.forEach(r => {
+        const name = r.querySelector('.cust-name')?.value || '';
+        const dob = r.querySelector('.cust-dob')?.value || '';
+        if (!name) return; // only count named rows
+        if (dob) {
+          const by = new Date(dob).getFullYear();
+          if (!isNaN(by)) {
+            const age = currentYear - by;
+            if (age > 12) adults++; else childs++;
+          } else {
+            adults++; // default
+          }
+        } else {
+          adults++; // default
+        }
+      });
+      base = adults * ADULT_PRICE + childs * CHILD_PRICE;
+      lastAdults = adults; lastChilds = childs;
+      repPreview.textContent = base.toLocaleString('vi-VN') + 'đ';
+    }
+
+    function onAddClick() { createRow(); computeTotals(); }
+    const addBtn = document.getElementById('addCustBtn');
+    if (addBtn) addBtn.addEventListener('click', onAddClick);
+    else document.addEventListener('click', (evt) => { if (evt.target && evt.target.closest && evt.target.closest('#addCustBtn')) onAddClick(); });
+
+    // build customers JSON and hidden fields on submit
+    form.addEventListener('submit', function(e){
+      const rows = Array.from(custList.querySelectorAll('.customer-item'));
+      const payload = [];
+      rows.forEach(r => {
+        const name = r.querySelector('.cust-name')?.value || '';
+        if (!name) return;
+        const gender = r.querySelector('.cust-gender')?.value || '';
+        const date = r.querySelector('.cust-dob')?.value || '';
+        const note = r.querySelector('.cust-note')?.value || '';
+        payload.push({name: name, gender: gender || null, date: date || null, note: note || null});
+      });
+      if (payload.length === 0) {
+        alert('Vui lòng thêm ít nhất 1 hành khách.');
+        e.preventDefault();
+        return;
+      }
+      // set hidden JSON
+      hiddenCustomers.value = JSON.stringify(payload);
+
+      // ensure adult_count / child_count and type fields exist (use lastAdults/lastChilds)
+      ['adult_count','child_count','type'].forEach(n => { const ex = form.querySelector('input[name="'+n+'"]'); if (ex) ex.remove(); });
+      const a = document.createElement('input'); a.type='hidden'; a.name='adult_count'; a.value = lastAdults || 0; form.appendChild(a);
+      const c = document.createElement('input'); c.type='hidden'; c.name='child_count'; c.value = lastChilds || 0; form.appendChild(c);
+      const t = document.createElement('input'); t.type='hidden'; t.name='type'; t.value = ( (parseInt(a.value) + parseInt(c.value)) && parseInt(c.value) > 0 ) ? 'Gia đình' : 'Cá nhân'; form.appendChild(t);
+
+      // allow normal submit
+    });
+
+    // init: add one customer row by default
+    createRow(); computeTotals();
+  });
+</script>
 
 
 <!-- Modal Thêm Khách Hàng -->
@@ -616,82 +733,48 @@ document.getElementById('customerSelect').addEventListener('change', function ()
         <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
 
-      <!-- Body: submit to controller to persist in DB -->
-      <form id="addRegistrantForm" method="POST" action="index.php?action=add-registrant">
-      <input type="hidden" name="booking_id" value="<?= htmlspecialchars($booking['id'] ?? '') ?>">
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label fw-bold">Họ và tên</label>
-          <input type="text" class="form-control" name="name" id="addName" placeholder="Nhập họ và tên" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">Email</label>
-          <input type="email" class="form-control" name="email" id="addEmail" placeholder="Nhập email">
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">Số điện thoại</label>
-          <input type="text" class="form-control" name="phone" id="addPhone" placeholder="Nhập số điện thoại">
-        </div>
-        <div class="row g-2 mb-3">
-          <div class="col-6">
-            <label class="form-label fw-bold">Người lớn</label>
-            <input type="number" class="form-control" name="adult_count" id="addAdult" min="0" value="1">
-          </div>
-          <div class="col-6">
-            <label class="form-label fw-bold">Trẻ em</label>
-            <input type="number" class="form-control" name="child_count" id="addChild" min="0" value="0">
-          </div>
-        </div>
+          <!-- Body: submit to controller to persist in DB (representative -> customers UI) -->
+          <form id="addRegistrantForm" method="POST" action="index.php?action=add-registrant">
+          <input type="hidden" name="booking_id" value="<?= htmlspecialchars($booking['id'] ?? '') ?>">
+          <input type="hidden" name="customers" id="hiddenCustomersJson" value="">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Họ và tên đại diện</label>
+              <input type="text" class="form-control" name="name" id="repName" placeholder="Nhập họ và tên đại diện" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Email</label>
+                <input type="email" class="form-control" name="email" id="repEmail" placeholder="Nhập email">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Số điện thoại</label>
+                <input type="text" class="form-control" name="phone" id="repPhone" placeholder="Nhập số điện thoại">
+              </div>
+            </div>
 
-        <div class="mb-2">
-          <small class="text-muted">Tổng tiền dự kiến: <span id="previewTotal" class="fw-bold text-danger">0đ</span></small>
-        </div>
-      </div>
+            <div class="mb-2 d-flex justify-content-between align-items-center">
+              <strong>Hành khách</strong>
+              <button type="button" id="addCustBtn" class="btn btn-sm btn-primary">+ Thêm hành khách</button>
+            </div>
 
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button class="btn btn-primary" type="submit" id="confirmAddCustomer">
-          <i class="bi bi-check-circle me-1"></i>Xác nhận thêm
-        </button>
-      </div>
-      </form>
+            <div id="custList" class="mb-3"></div>
+
+            <div class="mb-2">
+              <small class="text-muted">Tổng tiền dự kiến: <span id="repPreviewTotal" class="fw-bold text-danger">0đ</span></small>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button class="btn btn-primary" type="submit" id="confirmAddCustomer">
+              <i class="bi bi-check-circle me-1"></i>Xác nhận thêm
+            </button>
+          </div>
+          </form>
     </div>
   </div>
 </div>
-
-
-<script>
-  // Prices from PHP
-  const ADULT_PRICE = <?= (int)$adultPrice ?>;
-  const CHILD_PRICE = <?= (int)($booking['child_price'] ?? 0) ?>;
-
-  const adultInput = document.getElementById('addAdult');
-  const childInput = document.getElementById('addChild');
-  const previewTotal = document.getElementById('previewTotal');
-  const addForm = document.getElementById('addRegistrantForm');
-
-  function updatePreview() {
-    const adults = parseInt(adultInput.value) || 0;
-    const childs = parseInt(childInput.value) || 0;
-    const total = adults * ADULT_PRICE + childs * CHILD_PRICE;
-    previewTotal.textContent = total.toLocaleString('vi-VN') + 'đ';
-  }
-
-  adultInput.addEventListener('input', updatePreview);
-  childInput.addEventListener('input', updatePreview);
-  // initial preview
-  updatePreview();
-
-  addForm.addEventListener('submit', function (e) {
-    const name = document.getElementById('addName').value.trim();
-    if (!name) {
-      e.preventDefault();
-      alert('Vui lòng nhập tên khách hàng.');
-      return;
-    }
-    // allow submit — controller will handle DB insert and redirect back
-  });
-</script>
 </body>
 </html>

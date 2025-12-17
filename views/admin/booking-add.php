@@ -26,6 +26,8 @@
 
 <div class="container">
 
+    <a href="index.php?action=booking-list" class="btn btn-secondary mb-3">← Quay về danh sách đặt chỗ</a>
+
     <form id="bookingForm" action="index.php?action=booking-save" method="POST">
 
         <!-- NOTIFICATIONS -->
@@ -149,8 +151,11 @@ function addRepresentative() {
     `;
     repList.appendChild(el);
 
-    el.querySelector('.rep-remove').addEventListener('click', () => { el.remove(); computeAllTotals(); });
-    el.querySelector('.add-passenger-btn').addEventListener('click', () => addPassenger(idx));
+    // attach direct handlers for this element
+    const repRemoveBtn = el.querySelector('.rep-remove');
+    if (repRemoveBtn) repRemoveBtn.addEventListener('click', () => { el.remove(); computeAllTotals(); });
+    const addPassBtn = el.querySelector('.add-passenger-btn');
+    if (addPassBtn) addPassBtn.addEventListener('click', () => addPassenger(idx));
 }
 
 function addPassenger(repIdx) {
@@ -173,6 +178,11 @@ function addPassenger(repIdx) {
     list.appendChild(item);
     item.querySelector('.cust-remove').addEventListener('click', () => { item.remove(); computeAllTotals(); });
     item.querySelector('.cust-dob').addEventListener('change', computeAllTotals);
+    // focus first input so user can start typing immediately
+    const nameInput = item.querySelector('.cust-name');
+    if (nameInput) {
+        nameInput.focus();
+    }
     computeAllTotals();
 }
 
@@ -213,8 +223,27 @@ if (tourSelect) tourSelect.addEventListener('change', function(){
     const tourId = this.value;
     if (tourId) fetch('index.php?controller=booking&action=getSchedule&tour_id=' + tourId).then(r=>r.json()).then(data=>{
         const tbody = document.getElementById('scheduleBody'); tbody.innerHTML='';
-        if (data && data.length) { data.forEach(item=>{ const row=document.createElement('tr'); row.innerHTML=`<td><strong>Ngày ${item.day}</strong></td><td style="text-align:left">${item.activity||''}</td>`; tbody.appendChild(row); }); document.getElementById('scheduleTable').style.display='table'; document.getElementById('scheduleBox').style.display='none'; }
-        else { document.getElementById('scheduleTable').style.display='none'; document.getElementById('scheduleBox').style.display='block'; document.getElementById('scheduleBox').innerText='Không có lịch trình'; }
+        if (data && data.length) {
+            data.forEach(item=>{
+                const row=document.createElement('tr');
+                let html = `<td><strong>Ngày ${item.day}</strong></td><td style="text-align:left">${item.activity||''}`;
+                if (item.details && item.details.length) {
+                    html += '<ul style="margin:6px 0 0 18px; padding:0; list-style: none;">';
+                    item.details.forEach(d=>{
+                        const start = d.start_time || '';
+                        const end = d.end_time ? (' - ' + d.end_time) : '';
+                        html += `<li style="margin-bottom:4px; font-size:0.95rem;">` + (start ? `<strong>${start}${end}</strong> ` : '') + `${d.content || ''}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                html += '</td>';
+                row.innerHTML = html;
+                tbody.appendChild(row);
+            });
+            document.getElementById('scheduleTable').style.display='table'; document.getElementById('scheduleBox').style.display='none';
+        } else {
+            document.getElementById('scheduleTable').style.display='none'; document.getElementById('scheduleBox').style.display='block'; document.getElementById('scheduleBox').innerText='Không có lịch trình';
+        }
     }).catch(()=>{ document.getElementById('scheduleBox').innerText='Lỗi tải lịch trình'; document.getElementById('scheduleTable').style.display='none'; });
     computeAllTotals();
 });
@@ -253,6 +282,30 @@ document.getElementById('bookingForm').addEventListener('submit', function(e){
 });
 
 // init
+// Attach handler to add representative button (make robust)
+const btnAddRep = document.getElementById('btnAddRepresentative');
+if (btnAddRep) btnAddRep.addEventListener('click', addRepresentative);
+
+// Delegate add-passenger clicks in case listeners are not bound
+repList.addEventListener('click', function(evt){
+    const btn = evt.target.closest && evt.target.closest('.add-passenger-btn');
+    if (btn) {
+        evt.preventDefault(); evt.stopPropagation();
+        const rep = btn.closest('.representative');
+        if (rep) {
+            const idx = rep.getAttribute('data-index');
+            addPassenger(idx);
+        }
+        return;
+    }
+    const rem = evt.target.closest && evt.target.closest('.rep-remove');
+    if (rem) {
+        evt.preventDefault(); evt.stopPropagation();
+        const rep = rem.closest('.representative');
+        if (rep) { rep.remove(); computeAllTotals(); }
+    }
+});
+
 addRepresentative(); computeAllTotals();
 </script>
 

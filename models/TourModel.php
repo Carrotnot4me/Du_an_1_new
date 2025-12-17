@@ -68,13 +68,32 @@ class TourModel {
     
     // Lấy lịch trình cho tour
     public function getSchedule($tour_id) {
-        $sql = "SELECT day, activity FROM tour_schedules WHERE tour_id = :id ORDER BY day";
+        $sql = "SELECT * FROM tour_schedules WHERE tour_id = :id ORDER BY day";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':id' => $tour_id]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!$rows) return [];
+
+        $ids = array_map(function($r){ return (int)$r['id']; }, $rows);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $dsql = "SELECT * FROM tour_schedule_details WHERE schedule_id IN ($placeholders) ORDER BY start_time";
+        $dstmt = $this->conn->prepare($dsql);
+        $dstmt->execute($ids);
+        $details = $dstmt->fetchAll(PDO::FETCH_ASSOC);
+        $map = [];
+        foreach ($details as $d) {
+            $sid = (int)$d['schedule_id'];
+            if (!isset($map[$sid])) $map[$sid] = [];
+            $map[$sid][] = $d;
+        }
+
         $out = [];
         foreach ($rows as $r) {
-            $out[] = ['day' => (int)$r['day'], 'activity' => $r['activity']];
+            $out[] = [
+                'day' => (int)$r['day'],
+                'activity' => $r['activity'] ?? null,
+                'details' => $map[(int)$r['id']] ?? []
+            ];
         }
         return $out;
     }
@@ -249,7 +268,13 @@ class TourModel {
                 ]);
             }
 
-            // Delete and re-insert schedules
+            // Delete and re-insert schedules and their details
+            // first delete details linked to existing schedules
+            $sql = "DELETE d FROM tour_schedule_details d JOIN tour_schedules s ON d.schedule_id = s.id WHERE s.tour_id = :id";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id' => $id]);
+
+            // then delete schedules
             $sql = "DELETE FROM tour_schedules WHERE tour_id = :id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':id' => $id]);
@@ -257,10 +282,21 @@ class TourModel {
             if (!empty($data['schedule']) && is_array($data['schedule'])) {
                 $sqlSch = "INSERT INTO tour_schedules (tour_id, day, activity) VALUES (:id, :day, :activity)";
                 $stmtSch = $this->conn->prepare($sqlSch);
+                $sqlDet = "INSERT INTO tour_schedule_details (schedule_id, start_time, end_time, content) VALUES (:schedule_id, :start_time, :end_time, :content)";
+                $stmtDet = $this->conn->prepare($sqlDet);
                 foreach ($data['schedule'] as $s) {
                     $day = isset($s['day']) ? (int)$s['day'] : 1;
                     $activity = $s['activity'] ?? '';
                     $stmtSch->execute([':id' => $id, ':day' => $day, ':activity' => $activity]);
+                    $newScheduleId = $this->conn->lastInsertId();
+                    if (!empty($s['details']) && is_array($s['details'])) {
+                        foreach ($s['details'] as $d) {
+                            $start = $d['start_time'] ?? null;
+                            $end = $d['end_time'] ?? null;
+                            $content = $d['content'] ?? '';
+                            $stmtDet->execute([':schedule_id' => $newScheduleId, ':start_time' => $start, ':end_time' => $end, ':content' => $content]);
+                        }
+                    }
                 }
             }
 
@@ -333,6 +369,26 @@ class TourModel {
                     $day = isset($s['day']) ? (int)$s['day'] : 1;
                     $activity = $s['activity'] ?? '';
                     $stmtSch->execute([':id' => $newId, ':day' => $day, ':activity' => $activity]);
+                }
+            }
+
+            // Insert schedule details if provided
+            if (!empty($data['schedule']) && is_array($data['schedule'])) {
+                $sqlDet = "INSERT INTO tour_schedule_details (schedule_id, start_time, end_time, content) VALUES (:schedule_id, :start_time, :end_time, :content)";
+                $stmtDet = $this->conn->prepare($sqlDet);
+                // we need to fetch schedules we just inserted to get their ids in order
+                $stmtFetch = $this->conn->prepare("SELECT id FROM tour_schedules WHERE tour_id = :id ORDER BY id ASC");
+                $stmtFetch->execute([':id' => $newId]);
+                $schRows = $stmtFetch->fetchAll(PDO::FETCH_COLUMN);
+                $i = 0;
+                foreach ($data['schedule'] as $s) {
+                    $schId = $schRows[$i] ?? null;
+                    if ($schId && !empty($s['details']) && is_array($s['details'])) {
+                        foreach ($s['details'] as $d) {
+                            $stmtDet->execute([':schedule_id' => $schId, ':start_time' => $d['start_time'] ?? null, ':end_time' => $d['end_time'] ?? null, ':content' => $d['content'] ?? '']);
+                        }
+                    }
+                    $i++;
                 }
             }
 
@@ -465,6 +521,25 @@ class TourModel {
                     $day = isset($s['day']) ? (int)$s['day'] : 1;
                     $activity = $s['activity'] ?? '';
                     $stmtSch->execute([':id' => $data['id'], ':day' => $day, ':activity' => $activity]);
+                }
+            }
+
+            // Insert schedule details if provided
+            if (!empty($data['schedule']) && is_array($data['schedule'])) {
+                $sqlDet = "INSERT INTO tour_schedule_details (schedule_id, start_time, end_time, content) VALUES (:schedule_id, :start_time, :end_time, :content)";
+                $stmtDet = $this->conn->prepare($sqlDet);
+                $stmtFetch = $this->conn->prepare("SELECT id FROM tour_schedules WHERE tour_id = :id ORDER BY id ASC");
+                $stmtFetch->execute([':id' => $data['id']]);
+                $schRows = $stmtFetch->fetchAll(PDO::FETCH_COLUMN);
+                $i = 0;
+                foreach ($data['schedule'] as $s) {
+                    $schId = $schRows[$i] ?? null;
+                    if ($schId && !empty($s['details']) && is_array($s['details'])) {
+                        foreach ($s['details'] as $d) {
+                            $stmtDet->execute([':schedule_id' => $schId, ':start_time' => $d['start_time'] ?? null, ':end_time' => $d['end_time'] ?? null, ':content' => $d['content'] ?? '']);
+                        }
+                    }
+                    $i++;
                 }
             }
 

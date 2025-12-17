@@ -260,7 +260,28 @@ class BookingModel {
         $sql = "SELECT * FROM tour_schedules WHERE tour_id = ? ORDER BY day";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$tourId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $srows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!$srows) return [];
+
+        // collect schedule ids
+        $ids = array_map(function($r){ return (int)$r['id']; }, $srows);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $dsql = "SELECT * FROM tour_schedule_details WHERE schedule_id IN ($placeholders) ORDER BY start_time";
+        $dstmt = $this->conn->prepare($dsql);
+        $dstmt->execute($ids);
+        $details = $dstmt->fetchAll(PDO::FETCH_ASSOC);
+        $map = [];
+        foreach ($details as $d) {
+            $sid = (int)$d['schedule_id'];
+            if (!isset($map[$sid])) $map[$sid] = [];
+            $map[$sid][] = $d;
+        }
+
+        // attach details
+        foreach ($srows as &$r) {
+            $r['details'] = $map[(int)$r['id']] ?? [];
+        }
+        return $srows;
     }
 
     /**
@@ -444,6 +465,18 @@ class BookingModel {
 
             if (in_array('booking_id', $cols)) {
                 $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payment_history WHERE booking_id = ?");
+                $stmt->execute([$bookingId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                return (int)($row['total'] ?? 0);
+            }
+
+            // If payment_history doesn't have booking_id but has registrant_id, join via booking_registrants
+            if (in_array('registrant_id', $cols)) {
+                $sql = "SELECT COALESCE(SUM(p.amount),0) AS total
+                          FROM payment_history p
+                          JOIN booking_registrants br ON br.id = p.registrant_id
+                          WHERE br.booking_id = ?";
+                $stmt = $this->conn->prepare($sql);
                 $stmt->execute([$bookingId]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 return (int)($row['total'] ?? 0);
