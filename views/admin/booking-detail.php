@@ -642,9 +642,6 @@ document.getElementById('customerSelect').addEventListener('change', function ()
           <div class="col-md-3"><input type="date" class="form-control cust-dob"></div>
           <div class="col-md-2 text-end"><button type="button" class="btn btn-outline-danger btn-sm cust-remove">Xóa</button></div>
         </div>
-        <div class="row g-2 mt-2">
-          <div class="col-12"><input class="form-control form-control-sm cust-note" placeholder="Ghi chú (tùy chọn)"></div>
-        </div>
       `;
       custList.appendChild(el);
       const removeBtn = el.querySelector('.cust-remove');
@@ -695,8 +692,7 @@ document.getElementById('customerSelect').addEventListener('change', function ()
         if (!name) return;
         const gender = r.querySelector('.cust-gender')?.value || '';
         const date = r.querySelector('.cust-dob')?.value || '';
-        const note = r.querySelector('.cust-note')?.value || '';
-        payload.push({name: name, gender: gender || null, date: date || null, note: note || null});
+        payload.push({name: name, gender: gender || null, date: date || null});
       });
       if (payload.length === 0) {
         alert('Vui lòng thêm ít nhất 1 hành khách.');

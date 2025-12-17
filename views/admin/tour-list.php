@@ -98,6 +98,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
     <!-- MAIN CONTENT -->
     <main class="main">
+      
       <div class="topbar">
         <button class="btn btn-sm btn-outline-secondary d-md-none" id="btnToggle"><i class="bi bi-list"></i></button>
         <div class="me-2">VI</div>

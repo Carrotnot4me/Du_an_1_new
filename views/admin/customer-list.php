@@ -1,3 +1,45 @@
+<?php
+// Early AJAX endpoint: return customers as JSON before any HTML output
+require_once __DIR__ . '/../../commons/function.php';
+$db = connectDB();
+if (!empty($_GET['ajax_customers'])) {
+  $departureId = $_GET['departure_id'] ?? null;
+  $tourId = $_GET['tour_id'] ?? null;
+  try {
+    if ($departureId) {
+      $sql = "SELECT c.* , br.booking_id, br.id AS registrant_id
+          FROM customers c
+          JOIN booking_registrants br ON c.registrants_id = br.id
+          JOIN bookings b ON br.booking_id = b.id
+          WHERE b.departuresId = :dep
+          ORDER BY c.id ASC";
+      $stmt = $db->prepare($sql);
+      $stmt->execute([':dep' => $departureId]);
+    } elseif ($tourId) {
+      $sql = "SELECT c.* , br.booking_id, br.id AS registrant_id
+          FROM customers c
+          JOIN booking_registrants br ON c.registrants_id = br.id
+          JOIN bookings b ON br.booking_id = b.id
+          WHERE b.tourId = :tour
+          ORDER BY c.id ASC";
+      $stmt = $db->prepare($sql);
+      $stmt->execute([':tour' => $tourId]);
+    } else {
+      header('Content-Type: application/json; charset=utf-8');
+      echo json_encode(['success' => true, 'customers' => []], JSON_UNESCAPED_UNICODE);
+      exit;
+    }
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => true, 'customers' => $rows], JSON_UNESCAPED_UNICODE);
+  } catch (Exception $e) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => false, 'error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+  }
+  exit;
+}
+
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -120,21 +162,30 @@
       </div>
 
     <?php
-    function formatCurrency($amount) {
-        if (!$amount) return '0đ';
-        return number_format($amount, 0, ',', '.') . 'đ';
-    }
-    
-    function formatDate($dateString) {
-        if (!$dateString) return '';
-        return date('d/m/Y', strtotime($dateString));
-    }
+    function formatCurrency($amount) { if (!$amount) return '0đ'; return number_format($amount, 0, ',', '.') . 'đ'; }
+    function formatDate($dateString) { if (!$dateString) return ''; return date('d/m/Y', strtotime($dateString)); }
+
+     // build tours summary: only tours that have at least one booking
+     $sql = "SELECT t.id, t.type, t.name, t.max_people,
+        COALESCE((SELECT image_url FROM tour_images WHERE tour_id = t.id LIMIT 1),'') AS image_url,
+        MIN(d.dateStart) AS depart_start, MAX(d.dateEnd) AS depart_end,
+        COUNT(DISTINCT b.id) AS bookings_count,
+        COALESCE(SUM(CAST(br.quantity AS UNSIGNED)),0) AS registrants_total
+      FROM tours t
+      INNER JOIN bookings b ON b.tourId = t.id
+      LEFT JOIN departures d ON d.tourId = t.id
+      LEFT JOIN booking_registrants br ON br.booking_id = b.id
+      GROUP BY t.id
+      ORDER BY CAST(t.id AS UNSIGNED) ASC";
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+    $tours = $stmt->fetchAll(PDO::FETCH_ASSOC);
     ?>
 
-    <h3 style="margin-bottom:22px;color:#4a3512;">Danh sách Khách hàng</h3>
+    <h3 style="margin-bottom:22px;color:#4a3512;">Danh sách Tour & Booking (khách)</h3>
     <div class="grid">
       <div class="card-panel">
-        <h2 style="float:left;">Tổng số khách hàng: <?= count($customers ?? []) ?></h2>
+        <h2 style="float:left;">Tổng số tour: <?= count($tours) ?></h2>
         <div style="clear:both;"></div>
       </div>
     </div>
@@ -144,37 +195,36 @@
         <thead class="table-light">
           <tr>
             <th>STT</th>
-            <th>Email</th>
-            <th>Số điện thoại</th>
-            <th>Tổng số booking</th>
-            <th>Tổng chi tiêu</th>
-            <th>Booking đầu tiên</th>
-            <th>Booking gần nhất</th>
+            <th>Loại Tour</th>
+            <th>Tên Tour</th>
+            <th>Ngày khởi hành</th>
+            <th>Hình ảnh</th>
+            <th>Số lượng</th>
             <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
-          <?php if (empty($customers)): ?>
-            <tr>
-              <td colspan="8" class="text-center text-muted">Chưa có khách hàng nào</td>
-            </tr>
+          <?php if (empty($tours)): ?>
+            <tr><td colspan="7" class="text-center text-muted">Chưa có tour nào</td></tr>
           <?php else: ?>
-            <?php foreach ($customers as $index => $customer): ?>
+            <?php foreach ($tours as $index => $row): ?>
               <tr>
-                <th scope="row"><?= $index + 1 ?></th>
-                <td><?= htmlspecialchars($customer->email ?? '') ?></td>
-                <td><?= htmlspecialchars($customer->phone ?? '') ?></td>
-                <td><span class="badge bg-primary"><?= $customer->total_bookings ?? 0 ?></span></td>
-                <td><?= formatCurrency($customer->total_spent ?? 0) ?></td>
-                <td><?= formatDate($customer->first_booking_date ?? null) ?></td>
-                <td><?= formatDate($customer->last_booking_date ?? null) ?></td>
+                <td><?= $index + 1 ?></td>
+                <td><?= htmlspecialchars($row['type'] ?? '') ?></td>
+                <td><?= htmlspecialchars($row['name'] ?? '') ?></td>
                 <td>
-                  <button onclick="viewCustomerDetail('<?= htmlspecialchars($customer->email) ?>')" 
-                          class="btn btn-sm btn-info" title="Xem chi tiết">
-                    <i class="bi bi-eye"></i> Chi tiết
-                  </button>
+                  <?php if ($row['depart_start']):
+                    echo htmlspecialchars(formatDate($row['depart_start']));
+                    if ($row['depart_end']) echo ' - ' . htmlspecialchars(formatDate($row['depart_end']));
+                  else echo '-'; endif; ?>
+                </td>
+                <td><?= $row['image_url'] ? '<img src="' . htmlspecialchars($row['image_url']) . '" style="width:80px;height:50px;object-fit:cover;border-radius:4px;">' : '—' ?></td>
+                <td><?= (int)$row['registrants_total'] ?><?= isset($row['max_people']) && $row['max_people']>0 ? ' / ' . (int)$row['max_people'] : '' ?></td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-light btnToggleCustomers" data-tour-id="<?= htmlspecialchars($row['id']) ?>" title="Xem khách"><i class="bi bi-caret-down"></i></button>
                 </td>
               </tr>
+              <tr class="customer-row d-none"><td colspan="7" class="p-0 border-0"><div class="p-3 bg-white customer-list-container" style="display:none"></div></td></tr>
             <?php endforeach; ?>
           <?php endif; ?>
         </tbody>
@@ -369,6 +419,61 @@ function renderCustomerDetail(data) {
   
   document.getElementById('customerDetailContent').innerHTML = content;
 }
+</script>
+<script>
+// Toggle customers list under a tour row
+document.addEventListener('DOMContentLoaded', function(){
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]; }); }
+  function renderCustomersHtml(customers) {
+    if (!customers || customers.length === 0) return '<div class="text-muted p-2">Không có khách hàng</div>';
+    let html = '<div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-light"><tr><th>#</th><th>Tên</th><th>Ngày sinh</th><th>Giới tính</th><th>Booking ID</th></tr></thead><tbody>';
+    customers.forEach((c, idx) => {
+      html += `<tr><td>${idx+1}</td><td>${escapeHtml(c.name||'')}</td><td>${escapeHtml(c.date||'')}</td><td>${escapeHtml(c.gender||'')}</td><td>${escapeHtml(c.booking_id||'')}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  document.querySelectorAll('.btnToggleCustomers').forEach(btn => {
+    btn.addEventListener('click', async function(){
+      const tr = btn.closest('tr');
+      const next = tr.nextElementSibling;
+      if (!next || !next.classList.contains('customer-row')) return;
+      const container = next.querySelector('.customer-list-container');
+      const tourId = btn.getAttribute('data-tour-id') || '';
+
+      if (container.dataset.loaded === '1') {
+        const shown = container.style.display !== 'none';
+        container.style.display = shown ? 'none' : '';
+        next.classList.toggle('d-none', shown);
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams();
+        if (tourId) params.set('tour_id', tourId);
+        params.set('ajax_customers', '1');
+        const res = await fetch('index.php?action=customer-list&' + params.toString());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data.success) {
+          container.innerHTML = renderCustomersHtml(data.customers || []);
+          container.dataset.loaded = '1';
+          container.style.display = '';
+          next.classList.remove('d-none');
+        } else {
+          container.innerHTML = '<div class="p-2 text-danger">Lỗi khi tải khách hàng</div>';
+          container.style.display = '';
+          next.classList.remove('d-none');
+        }
+      } catch (err) {
+        container.innerHTML = '<div class="p-2 text-danger">' + escapeHtml(err.message) + '</div>';
+        container.style.display = '';
+        next.classList.remove('d-none');
+      }
+    });
+  });
+});
 </script>
 </body>
 </html>

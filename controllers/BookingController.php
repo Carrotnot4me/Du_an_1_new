@@ -297,7 +297,24 @@ class BookingController{
         ]);
 
         // get inserted registrant id (pattern used elsewhere in the app)
-        $registrantId = $this->model->getLastRegistrantId();
+        $insertOk = true;
+        // try to detect if insert succeeded
+        try {
+            $registrantId = $this->model->getLastRegistrantId();
+            if (!$registrantId) {
+                $insertOk = false;
+                error_log('BookingController::addRegistrant - insertCustomer did not create a registrant for booking ' . $bookingId);
+            }
+        } catch (Exception $e) {
+            $insertOk = false;
+            error_log('BookingController::addRegistrant error retrieving last registrant id: ' . $e->getMessage());
+        }
+
+        if (!$insertOk) {
+            $_SESSION['errors'][] = 'Không thể lưu khách đăng ký. Vui lòng thử lại.';
+            header("Location: index.php?action=booking-detail&booking_id=".urlencode($bookingId));
+            exit;
+        }
 
         // Persist nested customers if provided
         require_once __DIR__ . '/../models/CustomerModel.php';
@@ -313,7 +330,10 @@ class BookingController{
                     if ($cn === '') continue;
                     $cd = !empty($c['date']) ? $c['date'] : null;
                     $cg = isset($c['gender']) ? $c['gender'] : null;
-                    $cm->add($registrantId, $cn, $cd, $cg);
+                    $added = $cm->add($registrantId, $cn, $cd, $cg, $c['note'] ?? null);
+                    if (!$added) {
+                        error_log('BookingController::addRegistrant - failed to add nested customer: ' . json_encode($c));
+                    }
                 }
             }
         }

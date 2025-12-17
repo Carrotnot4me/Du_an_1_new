@@ -9,35 +9,10 @@ class NoteModel {
     }
 
     public function getAll() {
-        $sql = "
-            SELECT 
-                n.*,
-                b.email as customer_email,
-                b.phone as customer_phone
-            FROM notes n
-            LEFT JOIN bookings b ON n.customerId = CAST(b.id AS UNSIGNED)
-            ORDER BY n.id DESC
-        ";
+        $sql = "SELECT n.* FROM notes n ORDER BY n.id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        $notes = $stmt->fetchAll(PDO::FETCH_OBJ);
-        
-        // Nếu không tìm thấy qua booking, thử tìm qua customerId trực tiếp
-        foreach ($notes as $note) {
-            if (!$note->customer_email && $note->customerId) {
-                // Thử tìm booking với id = customerId
-                $sql2 = "SELECT email, phone FROM bookings WHERE id = :id LIMIT 1";
-                $stmt2 = $this->conn->prepare($sql2);
-                $stmt2->execute([':id' => $note->customerId]);
-                $booking = $stmt2->fetch(PDO::FETCH_OBJ);
-                if ($booking) {
-                    $note->customer_email = $booking->email;
-                    $note->customer_phone = $booking->phone;
-                }
-            }
-        }
-        
-        return $notes;
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
     public function getByCustomerId($customerId) {
@@ -48,14 +23,10 @@ class NoteModel {
     }
 
     public function getByEmail($email) {
-        // Lấy notes theo email - tìm booking đầu tiên của email đó
-        $sql = "
-            SELECT n.*, b.email as customer_email, b.phone as customer_phone
-            FROM notes n
-            INNER JOIN bookings b ON n.customerId = CAST(b.id AS UNSIGNED)
-            WHERE b.email = :email
-            ORDER BY n.id DESC
-        ";
+        // Find notes for bookings that have a registrant with this email
+        $sql = "SELECT n.* FROM notes n WHERE n.customerId IN (
+            SELECT DISTINCT booking_id FROM booking_registrants WHERE email = :email
+        ) ORDER BY n.id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':email' => $email]);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
