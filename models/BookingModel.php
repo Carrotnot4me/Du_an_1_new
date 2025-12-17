@@ -31,24 +31,30 @@ class BookingModel {
      */
     public function getTourSummaries() {
         // Summarize bookings per tour + per departure (separate rows when same tour has different departures)
-        $sql = "SELECT t.id AS tour_id,
-                       b.departuresId AS departure_id,
-                       d.dateStart AS departure_start,
-                       d.dateEnd AS departure_end,
-                       t.type,
-                       t.name,
-                       t.tour_code,
-                       t.main_destination,
-                       (SELECT ti.image_url FROM tour_images ti WHERE ti.tour_id = t.id LIMIT 1) AS image_url,
-                       t.max_people,
-                       COALESCE(SUM(CAST(br.quantity AS UNSIGNED)), 0) AS total_quantity,
-                       GROUP_CONCAT(DISTINCT b.status SEPARATOR ', ') AS statuses
-                FROM tours t
-                INNER JOIN bookings b ON b.tourId = t.id
-                LEFT JOIN departures d ON d.id = b.departuresId
-                LEFT JOIN booking_registrants br ON br.booking_id = b.id
-                GROUP BY t.id, b.departuresId
-                ORDER BY t.name ASC, departure_start DESC";
+                $sql = "SELECT t.id AS tour_id,
+                                             b.departuresId AS departure_id,
+                                             d.dateStart AS departure_start,
+                                             d.dateEnd AS departure_end,
+                                             t.type,
+                                             t.name,
+                                             t.tour_code,
+                                             t.main_destination,
+                                             (SELECT ti.image_url FROM tour_images ti WHERE ti.tour_id = t.id LIMIT 1) AS image_url,
+                                             t.max_people,
+                                             COALESCE(SUM(CAST(br.quantity AS UNSIGNED)), 0) AS total_quantity,
+                                             GROUP_CONCAT(DISTINCT b.status SEPARATOR ', ') AS statuses,
+                                             CASE
+                                                 WHEN d.dateStart IS NOT NULL AND CURDATE() < d.dateStart THEN 'Sắp đi'
+                                                 WHEN d.dateStart IS NOT NULL AND d.dateEnd IS NOT NULL AND CURDATE() BETWEEN d.dateStart AND d.dateEnd THEN 'Đang đi'
+                                                 WHEN d.dateEnd IS NOT NULL AND CURDATE() > d.dateEnd THEN 'Đã kết thúc'
+                                                 ELSE 'Sắp đi'
+                                             END AS computed_status
+                                FROM tours t
+                                INNER JOIN bookings b ON b.tourId = t.id
+                                LEFT JOIN departures d ON d.id = b.departuresId
+                                LEFT JOIN booking_registrants br ON br.booking_id = b.id
+                                GROUP BY t.id, b.departuresId
+                                ORDER BY t.name ASC, departure_start DESC";
         return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -56,24 +62,80 @@ class BookingModel {
      * Return all bookings for a specific departure id
      */
     public function getBookingsByDeparture($departureId) {
-        $sql = "SELECT b.*, t.name AS tour_name, d.dateStart AS departureDate
-                FROM bookings b
-                LEFT JOIN tours t ON b.tourId = t.id
-                LEFT JOIN departures d ON b.departuresId = d.id
-                WHERE b.departuresId = ?
-                ORDER BY b.id DESC";
+        $sql = "SELECT b.*, t.name AS tour_name, d.dateStart AS departureDate, d.dateEnd AS departureEnd,
+                   CASE
+                 WHEN d.dateStart IS NOT NULL AND CURDATE() < d.dateStart THEN 'Sắp đi'
+                 WHEN d.dateStart IS NOT NULL AND d.dateEnd IS NOT NULL AND CURDATE() BETWEEN d.dateStart AND d.dateEnd THEN 'Đang đi'
+                 WHEN d.dateEnd IS NOT NULL AND CURDATE() > d.dateEnd THEN 'Đã kết thúc'
+                 ELSE 'Sắp đi'
+                   END AS computed_status
+            FROM bookings b
+            LEFT JOIN tours t ON b.tourId = t.id
+            LEFT JOIN departures d ON b.departuresId = d.id
+            WHERE b.departuresId = ?
+            ORDER BY b.id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$departureId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getBookingById($bookingId) {
+        // Determine which meeting column exists in departures to avoid SQL errors
+        $meetingSelect = 'NULL AS meeting_point';
+        try {
+            $colStmt = $this->conn->query("DESCRIBE departures");
+            $cols = $colStmt->fetchAll(PDO::FETCH_COLUMN);
+            if (in_array('meetingPoint', $cols)) {
+                $meetingSelect = 'd.meetingPoint AS meeting_point';
+            } elseif (in_array('meeting_point', $cols)) {
+                $meetingSelect = 'd.meeting_point AS meeting_point';
+            }
+        } catch (Exception $e) {
+            // leave meetingSelect as NULL alias
+        }
+
+        $sql = "SELECT b.*, t.name AS tour_name, t.tour_code, tp.adult_price, tp.child_price, d.dateStart AS dateStart, d.dateEnd AS dateEnd, " . $meetingSelect . "
+            FROM bookings b
+            LEFT JOIN tours t ON b.tourId = t.id
+            LEFT JOIN tour_prices tp ON t.id = tp.tour_id
+            LEFT JOIN departures d ON b.departuresId = d.id
+            WHERE b.id = ? LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$bookingId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getRegistrantsByBooking($bookingId) {
+        $stmt = $this->conn->prepare("SELECT * FROM booking_registrants WHERE booking_id = ? ORDER BY id ASC");
+        $stmt->execute([$bookingId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getRegistrantById($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM booking_registrants WHERE id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateRegistrantStatus($id, $status) {
+        $stmt = $this->conn->prepare("UPDATE booking_registrants SET status = ? WHERE id = ?");
+        return $stmt->execute([$status, $id]);
+    }
+
     public function getBookingsByTour($tourId) {
-        $sql = "SELECT b.*, t.name AS tour_name, d.dateStart AS departureDate
-                FROM bookings b
-                LEFT JOIN tours t ON b.tourId = t.id
-                LEFT JOIN departures d ON b.departuresId = d.id
-                WHERE b.tourId = ?
-                ORDER BY b.id DESC";
+        $sql = "SELECT b.*, t.name AS tour_name, d.dateStart AS departureDate, d.dateEnd AS departureEnd,
+                   CASE
+                 WHEN d.dateStart IS NOT NULL AND CURDATE() < d.dateStart THEN 'Sắp đi'
+                 WHEN d.dateStart IS NOT NULL AND d.dateEnd IS NOT NULL AND CURDATE() BETWEEN d.dateStart AND d.dateEnd THEN 'Đang đi'
+                 WHEN d.dateEnd IS NOT NULL AND CURDATE() > d.dateEnd THEN 'Đã kết thúc'
+                 ELSE 'Sắp đi'
+                   END AS computed_status
+            FROM bookings b
+            LEFT JOIN tours t ON b.tourId = t.id
+            LEFT JOIN departures d ON b.departuresId = d.id
+            WHERE b.tourId = ?
+            ORDER BY b.id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$tourId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -124,18 +186,52 @@ class BookingModel {
     }
 
     public function insertCustomer($data) {
-        $sql = "INSERT INTO booking_registrants (id, booking_id, name, email, phone, type, quantity, status)
-                SELECT COALESCE(MAX(id),0)+1, ?, ?, ?, ?, ?, ?, ? FROM booking_registrants";
+        // Determine next id
+        $stmt = $this->conn->query("SELECT COALESCE(MAX(id),0)+1 AS next_id FROM booking_registrants");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $newId = $row ? (int)$row['next_id'] : 1;
+
+        // Detect optional columns (adult_count, child_count, amount)
+        $colsToCheck = ['adult_count','child_count','amount'];
+        $existing = [];
+        try {
+            $colStmt = $this->conn->query("DESCRIBE booking_registrants");
+            $cols = $colStmt->fetchAll(PDO::FETCH_COLUMN);
+            foreach ($colsToCheck as $c) {
+                if (in_array($c, $cols)) $existing[] = $c;
+            }
+        } catch (Exception $e) {
+            // ignore, fall back to basic columns
+        }
+
+        $base = ['id','booking_id','name','email','phone','type','quantity','status'];
+        $allCols = array_merge($base, $existing);
+
+        $placeholders = implode(',', array_fill(0, count($allCols), '?'));
+        $sql = "INSERT INTO booking_registrants (" . implode(',', $allCols) . ") VALUES ($placeholders)";
         $stmt = $this->conn->prepare($sql);
-        return $stmt->execute([
-            $data['booking_id'],
-            $data['name'] ?? $data['fullname'] ?? null,
-            $data['email'] ?? null,
-            $data['phone'] ?? null,
-            $data['type'] ?? null,
-            $data['quantity'] ?? null,
-            $data['status'] ?? null,
-        ]);
+
+        $params = [];
+        $params[] = $newId;
+        $params[] = $data['booking_id'];
+        $params[] = $data['name'] ?? $data['fullname'] ?? null;
+        $params[] = $data['email'] ?? null;
+        $params[] = $data['phone'] ?? null;
+        $params[] = $data['type'] ?? null;
+        $params[] = $data['quantity'] ?? null;
+        $params[] = $data['status'] ?? null;
+
+        if (in_array('adult_count', $existing)) $params[] = $data['adult_count'] ?? 0;
+        if (in_array('child_count', $existing)) $params[] = $data['child_count'] ?? 0;
+        if (in_array('amount', $existing)) $params[] = $data['amount'] ?? null;
+
+        return $stmt->execute($params);
+    }
+
+    public function getLastRegistrantId() {
+        $stmt = $this->conn->query("SELECT id FROM booking_registrants ORDER BY CAST(id AS UNSIGNED) DESC LIMIT 1");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? (int)$row['id'] : 0;
     }
 
     /* ======================
@@ -165,6 +261,21 @@ class BookingModel {
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$tourId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get first image URL for a tour if available
+     */
+    public function getTourImage($tourId) {
+        try {
+            $stmt = $this->conn->prepare("SELECT image_url FROM tour_images WHERE tour_id = ? LIMIT 1");
+            $stmt->execute([$tourId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ? $row['image_url'] : null;
+        } catch (Exception $e) {
+            error_log('getTourImage error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function getDepartures() {
@@ -315,6 +426,54 @@ class BookingModel {
             if ($this->conn->inTransaction()) $this->conn->rollBack();
             error_log($e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Return total payments amount recorded for a booking
+     */
+    public function getPaymentsTotalByBooking($bookingId) {
+        try {
+            // Check payment_history columns to decide query
+            try {
+                $colStmt = $this->conn->query("DESCRIBE payment_history");
+                $cols = $colStmt->fetchAll(PDO::FETCH_COLUMN);
+            } catch (Exception $e) {
+                $cols = [];
+            }
+
+            if (in_array('booking_id', $cols)) {
+                $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payment_history WHERE booking_id = ?");
+                $stmt->execute([$bookingId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                return (int)($row['total'] ?? 0);
+            }
+
+            // fallback to legacy payments table
+            $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payments WHERE bookingId = ?");
+            $stmt->execute([$bookingId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['total'] ?? 0);
+        } catch (Exception $e) {
+            error_log('getPaymentsTotalByBooking error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Sum payments for a specific registrant from payment_history (fallback 0)
+     */
+    public function getPaidByRegistrant($registrantId) {
+        try {
+            $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payment_history WHERE registrant_id = ?");
+            $stmt->execute([$registrantId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) return (int)($row['total'] ?? 0);
+
+            return 0;
+        } catch (Exception $e) {
+            error_log('getPaidByRegistrant error: ' . $e->getMessage());
+            return 0;
         }
     }
 }
