@@ -320,13 +320,7 @@
                 </div>
                 <div class="log-content">
                   <p style="color: #4a3512; white-space: pre-wrap;"><?= htmlspecialchars($log->content ?? '') ?></p>
-                  <?php if (!empty($log->images)): ?>
-                    <div class="log-images">
-                      <?php foreach ($log->images as $img): ?>
-                        <img src="<?= htmlspecialchars($img) ?>" alt="Log image" onerror="this.src='/assets/placeholder.jpg'">
-                      <?php endforeach; ?>
-                    </div>
-                  <?php endif; ?>
+                
                 </div>
               </div>
             <?php endforeach; ?>
@@ -376,10 +370,6 @@
             <div class="mb-3">
               <label for="logContent" class="form-label">Nội dung nhật ký</label>
               <textarea class="form-control" id="logContent" name="content" rows="6" required placeholder="Ghi lại các hoạt động, sự kiện trong tour..."></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="logImages" class="form-label">Hình ảnh (URL, cách nhau bằng dấu phẩy)</label>
-              <input type="text" class="form-control" id="logImages" name="images" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg">
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -477,7 +467,6 @@
           document.getElementById('logGuideId').value = log.guideId || '';
           document.getElementById('logDay').value = log.day || 1;
           document.getElementById('logContent').value = log.content || '';
-          document.getElementById('logImages').value = (log.images || []).join(', ');
           document.getElementById('logModalTitle').textContent = 'Chỉnh sửa nhật ký';
 
           const modal = new bootstrap.Modal(document.getElementById('addLogModal'));
@@ -526,21 +515,18 @@
       const guideId = document.getElementById('logGuideId').value;
       const day = document.getElementById('logDay').value;
       const content = document.getElementById('logContent').value;
-      const imagesInput = document.getElementById('logImages').value;
 
       if (!tourId || !content) {
         alert('Vui lòng điền đầy đủ thông tin bắt buộc');
         return;
       }
 
-      const images = imagesInput ? imagesInput.split(',').map(url => url.trim()).filter(url => url) : [];
 
       const data = {
         tourId: tourId,
         guideId: guideId || null,
         day: parseInt(day),
         content: content,
-        images: images
       };
 
       if (logId) {
@@ -561,6 +547,7 @@
 
         if (result.success) {
           alert(logId ? 'Cập nhật nhật ký thành công!' : 'Thêm nhật ký thành công!');
+          console.log("hihii");
           bootstrap.Modal.getInstance(document.getElementById('addLogModal')).hide();
           window.location.reload();
         } else {
