@@ -19,7 +19,7 @@
     <nav>
 
         <!-- TRANG CHÍNH -->
-        <a class="nav-item active" href="index.php?action=dashboard">
+        <a class="nav-item " href="index.php?action=dashboard">
           <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
         </a>
 
@@ -30,7 +30,7 @@
         </a>
         <a class="nav-item" href="index.php?action=customer-list"><i class="bi bi-people me-2"></i> Quản lý Khách hàng</a>
 
-        <a class="nav-item" href="index.php?action=supplier-list">
+        <a class="nav-item active" href="index.php?action=supplier-list">
           <i class="bi bi-building me-2"></i> Quản lý Nhà Cung Cấp
         </a>
 
@@ -68,10 +68,6 @@
         </a>
 
         <!-- KHÁC -->
-
-        <a class="nav-item" href="index.php?action=guide-special">
-          <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
-        </a>
 
         <a class="nav-item" href="index.php?action=special-notes">
           <i class="bi bi-sticky me-2"></i> Ghi chú

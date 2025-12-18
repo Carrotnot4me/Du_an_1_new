@@ -29,13 +29,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
       <nav>
 
         <!-- TRANG CHÍNH -->
-        <a class="nav-item active" href="index.php?action=dashboard">
+        <a class="nav-item " href="index.php?action=dashboard">
           <i class="bi bi-house-door-fill me-2"></i> Trang quản trị
         </a>
 
         <!-- QUẢN LÝ TOUR -->
 
-        <a class="nav-item" href="index.php?action=tour-list">
+        <a class="nav-item active" href="index.php?action=tour-list">
           <i class="bi bi-airplane me-2"></i> Danh sách Tour
         </a>
         <a class="nav-item" href="index.php?action=customer-list"><i class="bi bi-people me-2"></i> Quản lý Khách hàng</a>
@@ -79,9 +79,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
         <!-- KHÁC -->
 
-        <a class="nav-item" href="index.php?action=guide-special">
-          <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
-        </a>
+        
 
         <a class="nav-item" href="index.php?action=special-notes">
           <i class="bi bi-sticky me-2"></i> Ghi chú

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 17, 2025 at 07:27 PM
+-- Generation Time: Dec 17, 2025 at 08:31 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -24,282 +24,48 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `checkins`
+-- Table structure for table `suppliers`
 --
 
-CREATE TABLE `checkins` (
-  `id` int NOT NULL,
-  `customer_id` int NOT NULL,
-  `checkin_time` datetime DEFAULT NULL,
-  `status` enum('Đã checkin','Chưa checkin') DEFAULT 'Chưa checkin'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `checkins`
---
-ALTER TABLE `checkins`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_checkins_customer` (`customer_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `checkins`
---
-ALTER TABLE `checkins`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `checkins`
---
-ALTER TABLE `checkins`
-  ADD CONSTRAINT `fk_checkins_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
--- phpMyAdmin SQL Dump
--- version 5.2.0
--- https://www.phpmyadmin.net/
---
--- Host: localhost:3306
--- Generation Time: Dec 17, 2025 at 07:27 PM
--- Server version: 8.0.30
--- PHP Version: 8.1.10
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `travel`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `customers`
---
-
-CREATE TABLE `customers` (
+CREATE TABLE `suppliers` (
   `id` int NOT NULL,
   `name` varchar(255) NOT NULL,
-  `date` date DEFAULT NULL,
-  `gender` varchar(255) DEFAULT NULL,
-  `registrants_id` int DEFAULT NULL,
-  `note` varchar(255) DEFAULT NULL
+  `service_type` enum('khach_san','nha_hang','xe','may_bay','khac') NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `description` text,
+  `logo` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `customers`
+-- Dumping data for table `suppliers`
 --
 
-INSERT INTO `customers` (`id`, `name`, `date`, `gender`, `registrants_id`, `note`) VALUES
-(1, 'Tạ Vũ Trí', '2006-08-20', 'Nam', 1, 'Khách muốn thưởng thức đặc sản địa phương, hạn chế món công nghiệp.'),
-(2, 'Nguyễn Mạnh Hùng', '2006-08-20', 'Nam', 1, 'Khách dị ứng hải sản, vui lòng không sắp xếp món liên quan'),
-(3, 'Tạ Văn Trường', '2000-02-26', 'Nam', 2, NULL),
-(4, 'Nguyễn Huy Hoàng', '2016-02-17', 'Nam', 2, NULL),
-(5, 'Nguyễn Văn An', '1999-11-10', 'Nữ', 3, 'Tôi bị nguu'),
-(6, 'Phạm Quốc Huy', '2004-05-18', 'Nam', 3, 'ưqfewfffffffasdFE'),
-(7, 'Phan Ngọc Ánh', '2008-07-19', 'Nữ', 4, 'Khách sạn phải sạch sẽ'),
-(8, 'Nguyễn Thu Trang', '2009-09-21', 'Nữ', 4, 'Muốn ngủ'),
-(9, 'Nguyễn Thị Hồng', '2007-06-30', 'Nữ', 4, 'Không thích đi chơi'),
-(10, 'Lưu Hoàng Phúc', '2006-06-16', 'Nam', 5, 'Không ở phòng gần thang máy vì khách nhạy cảm tiếng ồn.'),
-(11, 'Phạm Nhật Minh', '1992-06-30', 'Nam', 5, 'Ưu tiên các điểm tham quan nhẹ nhàng, không leo núi nhiều'),
-(12, 'Nguyễn Quang Vinh', '2004-02-19', 'Nam', 5, 'Kỷ niệm ngày đặc biệt của khách, mong có trải nghiệm bất ngờ nhỏ (nếu có thể).');
+INSERT INTO `suppliers` (`id`, `name`, `service_type`, `address`, `email`, `phone`, `website`, `description`, `logo`) VALUES
+(1, 'Khách sạn Sunrise Đà Nẵng', 'khach_san', 'Sơn Trà, Đà Nẵng', 'contact@sunrisedanang.vn', '0901234567', 'https://sunrisedanang.vn', 'Khách sạn 4 sao gần biển, buffet sáng, hồ bơi, phòng hội nghị, phù hợp khách đoàn và gia đình.', NULL),
+(2, 'Khách sạn Royal Lotus Hạ Long', 'khach_san', 'Bãi Cháy, TP. Hạ Long, Quảng Ninh', 'info@royallotushalong.vn', '0902345678', 'https://royallotushalong.vn', 'Khách sạn cao cấp gần vịnh Hạ Long, phòng rộng, nhà hàng sang trọng, tiện nghi hiện đại.', NULL),
+(3, 'Resort Ocean View Phú Quốc', 'khach_san', 'Bãi Trường, Phú Quốc, Kiên Giang', 'booking@oceanviewphuquoc.vn', '0903456789', 'https://oceanviewphuquoc.vn', 'Resort 5 sao, bãi biển riêng, spa cao cấp, phù hợp tour nghỉ dưỡng và honeymoon.', NULL),
+(4, 'Nhà hàng Biển Xanh', 'nha_hang', 'Trần Phú, TP. Nha Trang, Khánh Hòa', 'bienxanhrestaurant@gmail.com', '0904567890', 'https://bienxanhnhatrang.vn', 'Nhà hàng hải sản tươi sống, phục vụ đoàn khách lớn, thực đơn phong phú.', NULL),
+(5, 'Nhà hàng Quê Việt', 'nha_hang', 'Quận 1, TP. Hồ Chí Minh', 'quevietrestaurant@gmail.com', '0905678901', 'https://queviet.vn', 'Ẩm thực truyền thống Việt Nam, không gian cổ điển, phù hợp khách quốc tế.', NULL),
+(6, 'Nhà hàng Đồng Quê Hội An', 'nha_hang', 'Cẩm Châu, TP. Hội An, Quảng Nam', 'dongquehoian@gmail.com', '0906789012', 'https://dongquehoian.vn', 'Ẩm thực địa phương Hội An, phục vụ tour trải nghiệm văn hóa.', NULL),
+(7, 'Xe du lịch Thành Công', 'xe', 'Quận 7, TP. Hồ Chí Minh', 'thanhcongcar@gmail.com', '0907890123', 'https://thanhcongtravelcar.vn', 'Cung cấp xe du lịch 16–45 chỗ, tài xế chuyên nghiệp, phục vụ tour dài ngày.', NULL),
+(8, 'Xe du lịch Hoàng Gia', 'xe', 'Cầu Giấy, Hà Nội', 'hoanggiacar@gmail.com', '0908901234', 'https://hoanggiacar.vn', 'Dịch vụ xe cao cấp, xe đời mới, phục vụ tour miền Bắc và liên tỉnh.', NULL),
+(9, 'Vietnam Airlines', 'may_bay', 'Long Biên, Hà Nội', 'support@vietnamairlines.com', '19001100', 'https://www.vietnamairlines.com', 'Hãng hàng không quốc gia Việt Nam, nhiều đường bay nội địa và quốc tế.', NULL),
+(10, 'VietJet Air', 'may_bay', 'Tân Bình, TP. Hồ Chí Minh', 'customercare@vietjetair.com', '19001886', 'https://www.vietjetair.com', 'Hãng hàng không giá rẻ, tần suất bay cao, phù hợp tour tiết kiệm.', NULL),
+(11, 'Bamboo Airways', 'may_bay', 'Quận Hoàn Kiếm, Hà Nội', 'support@bambooairways.com', '19001166', 'https://www.bambooairways.com', 'Hãng hàng không định hướng dịch vụ, chất lượng cao.', NULL),
+(12, 'Khách sạn Mường Thanh Luxury', 'khach_san', 'Ngũ Hành Sơn, Đà Nẵng', 'muongthanh@muongthanh.vn', '02363666666', 'https://luxurydanang.muongthanh.com', 'Chuỗi khách sạn lớn, vị trí đẹp, phục vụ nhiều đoàn tour lớn.', NULL);
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `customers`
+-- Indexes for table `suppliers`
 --
-ALTER TABLE `customers`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_registrants_id` (`registrants_id`);
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `customers`
---
-ALTER TABLE `customers`
-  ADD CONSTRAINT `fk_customers_registrants` FOREIGN KEY (`registrants_id`) REFERENCES `booking_registrants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
--- phpMyAdmin SQL Dump
--- version 5.2.0
--- https://www.phpmyadmin.net/
---
--- Host: localhost:3306
--- Generation Time: Dec 17, 2025 at 07:28 PM
--- Server version: 8.0.30
--- PHP Version: 8.1.10
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `travel`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `departures`
---
-
-CREATE TABLE `departures` (
-  `id` varchar(10) NOT NULL,
-  `tourId` varchar(10) DEFAULT NULL,
-  `dateStart` date DEFAULT NULL,
-  `dateEnd` date DEFAULT NULL,
-  `meetingPoint` varchar(255) DEFAULT NULL,
-  `guideId` varchar(10) DEFAULT NULL,
-  `driverId` varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `departures`
---
-
-INSERT INTO `departures` (`id`, `tourId`, `dateStart`, `dateEnd`, `meetingPoint`, `guideId`, `driverId`) VALUES
-('1', '17', '2025-12-27', '2026-01-07', 'Sân Bay Tân Sơn Nhất', 'WBeUkHX', '9'),
-('2', '11', '2025-12-10', '2025-12-20', 'Sân Bay Tân Sơn Nhất', '2', '10'),
-('3', '14', '2025-12-19', '2025-12-24', 'Sân Bay Tân Sơn Nhất', '1', '10');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `departures`
---
-ALTER TABLE `departures`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `tourId` (`tourId`),
-  ADD KEY `guideId` (`guideId`),
-  ADD KEY `departures_ibfk_3` (`driverId`);
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `departures`
---
-ALTER TABLE `departures`
-  ADD CONSTRAINT `departures_ibfk_1` FOREIGN KEY (`tourId`) REFERENCES `tours` (`id`),
-  ADD CONSTRAINT `departures_ibfk_2` FOREIGN KEY (`guideId`) REFERENCES `staffs` (`id`),
-  ADD CONSTRAINT `departures_ibfk_3` FOREIGN KEY (`driverId`) REFERENCES `drivers` (`id`);
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
--- phpMyAdmin SQL Dump
--- version 5.2.0
--- https://www.phpmyadmin.net/
---
--- Host: localhost:3306
--- Generation Time: Dec 17, 2025 at 07:29 PM
--- Server version: 8.0.30
--- PHP Version: 8.1.10
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `travel`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `bookings`
---
-
-CREATE TABLE `bookings` (
-  `id` varchar(10) NOT NULL,
-  `tourId` varchar(10) DEFAULT NULL,
-  `status` varchar(50) DEFAULT NULL,
-  `driverId` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `staffId` varchar(10) DEFAULT NULL,
-  `departuresId` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `bookings`
---
-
-INSERT INTO `bookings` (`id`, `tourId`, `status`, `driverId`, `staffId`, `departuresId`) VALUES
-('1', '17', 'Sắp đi', '9', 'WBeUkHX', '1'),
-('2', '11', 'Sắp đi', '10', '1', '2'),
-('3', '14', 'Sắp đi', '10', '1', '3');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `bookings`
---
-ALTER TABLE `bookings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `tourId` (`tourId`),
-  ADD KEY `fk_bookings_driver` (`driverId`),
-  ADD KEY `fk_bookings_staff` (`staffId`),
-  ADD KEY `fk_bookings_departures` (`departuresId`);
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `bookings`
---
-ALTER TABLE `bookings`
-  ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`tourId`) REFERENCES `tours` (`id`),
-  ADD CONSTRAINT `fk_bookings_departures` FOREIGN KEY (`departuresId`) REFERENCES `departures` (`id`),
-  ADD CONSTRAINT `fk_bookings_driver` FOREIGN KEY (`driverId`) REFERENCES `drivers` (`id`),
-  ADD CONSTRAINT `fk_bookings_staff` FOREIGN KEY (`staffId`) REFERENCES `staffs` (`id`);
+ALTER TABLE `suppliers`
+  ADD PRIMARY KEY (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
