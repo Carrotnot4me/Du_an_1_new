@@ -70,9 +70,6 @@
 
         <!-- KHÁC -->
 
-        <a class="nav-item" href="index.php?action=guide-special">
-          <i class="bi bi-heart-pulse me-2"></i> Yêu cầu đặc biệt
-        </a>
 
         <a class="nav-item" href="index.php?action=special-notes">
           <i class="bi bi-sticky me-2"></i> Ghi chú
